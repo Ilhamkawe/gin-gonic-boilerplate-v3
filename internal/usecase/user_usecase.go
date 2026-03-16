@@ -1,0 +1,80 @@
+package usecase
+
+import (
+	"context"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/kawe/warehouse_backend/internal/domain"
+)
+
+type userUsecase struct {
+	userRepo       domain.UserRepository
+	contextTimeout time.Duration
+}
+
+func NewUserUsecase(ur domain.UserRepository, timeout time.Duration) domain.UserUsecase {
+	return &userUsecase{
+		userRepo:       ur,
+		contextTimeout: timeout,
+	}
+}
+
+func (u *userUsecase) Create(ctx context.Context, user *domain.User) error {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	// Check if email already exists
+	existedUser, _ := u.userRepo.GetByEmail(ctx, user.Email)
+	if existedUser != nil {
+		return domain.ErrConflict
+	}
+
+	user.UUID = uuid.New()
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+
+	return u.userRepo.Create(ctx, user)
+}
+
+func (u *userUsecase) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	return u.userRepo.GetByID(ctx, id)
+}
+
+func (u *userUsecase) Fetch(ctx context.Context, page int, limit int) ([]domain.User, int64, error) {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	offset := (page - 1) * limit
+	return u.userRepo.Fetch(ctx, limit, offset)
+}
+
+func (u *userUsecase) Update(ctx context.Context, user *domain.User) error {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	existingUser, err := u.userRepo.GetByID(ctx, user.UUID)
+	if err != nil {
+		return err
+	}
+
+	if user.Name != "" {
+		existingUser.Name = user.Name
+	}
+	if user.Password != "" {
+		existingUser.Password = user.Password
+	}
+	existingUser.UpdatedAt = time.Now()
+
+	return u.userRepo.Update(ctx, existingUser)
+}
+
+func (u *userUsecase) Delete(ctx context.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	return u.userRepo.Delete(ctx, id)
+}
