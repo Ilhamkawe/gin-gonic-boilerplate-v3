@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,4 +28,20 @@ type UserAccess struct {
 	UpdatedAt  time.Time  `json:"updated_at"`
 	DeletedAt  time.Time  `json:"deleted_at"`
 	LastSync   time.Time  `json:"last_sync"`
+}
+
+type UserAccessRepository interface {
+	Create(ctx context.Context, userAccess *UserAccess) error
+	GetByID(ctx context.Context, id uuid.UUID) (*UserAccess, error)
+	Fetch(ctx context.Context, limit int, offset int) ([]UserAccess, int64, error)
+	Update(ctx context.Context, userAccess *UserAccess) error
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+type UserAccessUseCase interface {
+	Create(ctx context.Context, userAccess *UserAccess) error
+	GetByID(ctx context.Context, id uuid.UUID) (*UserAccess, error)
+	Fetch(ctx context.Context, limit int, offset int) ([]UserAccess, int64, error)
+	Update(ctx context.Context, userAccess *UserAccess) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
