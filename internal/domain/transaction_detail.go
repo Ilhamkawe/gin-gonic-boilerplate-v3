@@ -8,8 +8,8 @@ import (
 )
 
 type TransactionDetail struct {
-	ID            int         `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID          uuid.UUID   `json:"uuid" gorm:"type:uuid;primaryKey"`
+	ID            int         `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID          uuid.UUID   `json:"uuid" gorm:"type:uuid;not null;unique"`
 	TransactionID int         `json:"transaction_id" gorm:"not null"`
 	Transaction   Transaction `gorm:"foreignKey:TransactionID;references:ID"`
 	ProductID     int         `json:"product_id" gorm:"not null"`

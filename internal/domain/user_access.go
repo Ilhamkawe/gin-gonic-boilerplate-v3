@@ -16,8 +16,8 @@ const (
 )
 
 type UserAccess struct {
-	ID         int        `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID       uuid.UUID  `json:"uuid" gorm:"type:uuid;unique;not null"`
+	ID         int        `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID       uuid.UUID  `json:"uuid" gorm:"type:uuid;not null;unique"`
 	UserID     int        `json:"user_id" gorm:"not null"`
 	User       User       `gorm:"foreignKey:UserID;references:ID"`
 	RoleID     int        `json:"role_id" gorm:"not null"`

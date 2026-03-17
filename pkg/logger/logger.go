@@ -24,10 +24,12 @@ func NewLogger() *Logger {
 }
 
 func (l *Logger) Info(msg string, args ...interface{}) {
+	l.Logger.Helper()
 	l.Logger.Infof(msg, args...)
 }
 
 func (l *Logger) Error(err error, msg string, args ...interface{}) {
+	l.Logger.Helper()
 	if err != nil {
 		l.Logger.Error(msg, "error", err, "details", args)
 	} else {
@@ -36,6 +38,7 @@ func (l *Logger) Error(err error, msg string, args ...interface{}) {
 }
 
 func (l *Logger) Fatal(err error, msg string, args ...interface{}) {
+	l.Logger.Helper()
 	if err != nil {
 		l.Logger.Fatal(msg, "error", err, "details", args)
 	} else {
@@ -46,13 +49,16 @@ func (l *Logger) Fatal(err error, msg string, args ...interface{}) {
 var DefaultLogger = NewLogger()
 
 func Info(msg string, args ...interface{}) {
+	DefaultLogger.Helper()
 	DefaultLogger.Info(msg, args...)
 }
 
 func Error(err error, msg string, args ...interface{}) {
+	DefaultLogger.Helper()
 	DefaultLogger.Error(err, msg, args...)
 }
 
 func Fatal(err error, msg string, args ...interface{}) {
+	DefaultLogger.Helper()
 	DefaultLogger.Fatal(err, msg, args...)
 }

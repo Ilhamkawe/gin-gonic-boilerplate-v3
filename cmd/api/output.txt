@@ -1,0 +1,16 @@
+12:58PM INFO <database/postgres.go:33> Successfully connected to PostgreSQL via GORM
+12:58PM INFO <database/migration.go:10> Running auto migration...
+12:58PM INFO <database/migration.go:41> Migration completed successfully
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health                   --> github.com/kawe/warehouse_backend/internal/delivery/http.NewRouter.func1 (4 handlers)
+[GIN-debug] POST   /api/v1/users             --> github.com/kawe/warehouse_backend/internal/delivery/http/handler.(*UserHandler).Create-fm (4 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/kawe/warehouse_backend/internal/delivery/http/handler.(*UserHandler).Fetch-fm (4 handlers)
+[GIN-debug] GET    /api/v1/users/:id         --> github.com/kawe/warehouse_backend/internal/delivery/http/handler.(*UserHandler).GetByID-fm (4 handlers)
+[GIN-debug] PUT    /api/v1/users/:id         --> github.com/kawe/warehouse_backend/internal/delivery/http/handler.(*UserHandler).Update-fm (4 handlers)
+[GIN-debug] DELETE /api/v1/users/:id         --> github.com/kawe/warehouse_backend/internal/delivery/http/handler.(*UserHandler).Delete-fm (4 handlers)
+12:58PM INFO <api/main.go:66> Starting server on port 8080
+12:58PM FATA <api/main.go:68> Failed to start server error="listen tcp :8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted." details=[]
+exit status 1

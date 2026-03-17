@@ -8,8 +8,8 @@ import (
 )
 
 type User struct {
-	ID        int       `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;primaryKey"`
+	ID        int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
 	Email     string    `json:"email" gorm:"unique;not null"`
 	Password  string    `json:"-" gorm:"not null"`
 	Name      string    `json:"name" gorm:"not null"`

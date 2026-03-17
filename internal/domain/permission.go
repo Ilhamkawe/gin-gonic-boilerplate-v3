@@ -8,8 +8,8 @@ import (
 )
 
 type Permission struct {
-	ID          int       `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID        uuid.UUID `json:"uuid" gorm:"type:uuid;primaryKey"`
+	ID          int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID        uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
 	Name        string    `json:"name" gorm:"not null"`
 	Module      string    `json:"module" gorm:"not null"`
 	Description string    `json:"description" gorm:"not null"`

@@ -8,8 +8,8 @@ import (
 )
 
 type Warehouse struct {
-	ID        int       `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;primaryKey"`
+	ID        int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
 	Name      string    `json:"name" gorm:"not null"`
 	Address   string    `json:"address" gorm:"not null"`
 	Phone     string    `json:"phone" gorm:"not null"`

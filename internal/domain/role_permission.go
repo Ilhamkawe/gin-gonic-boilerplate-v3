@@ -8,8 +8,8 @@ import (
 )
 
 type RolePermission struct {
-	ID           int       `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID         uuid.UUID `json:"uuid" gorm:"type:uuid;primaryKey"`
+	ID           int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID         uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
 	RoleID       int
 	Role         Role `gorm:"foreignKey:RoleID;references:ID"`
 	PermissionID int

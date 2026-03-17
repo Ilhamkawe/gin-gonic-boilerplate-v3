@@ -9,8 +9,8 @@ import (
 )
 
 type Category struct {
-	ID        int            `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID      uuid.UUID      `json:"uuid" gorm:"type:uuid;unique;not null"`
+	ID        int            `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID      uuid.UUID      `json:"uuid" gorm:"type:uuid;not null;unique"`
 	Name      string         `json:"name" gorm:"not null"`
 	Icon      string         `json:"icon" gorm:"not null"`
 	Tagline   string         `json:"tagline" gorm:"not null"`

@@ -8,8 +8,8 @@ import (
 )
 
 type StockMovement struct {
-	ID           int       `json:"id" gorm:"primaryKey;autoIncrement"`
-	UUID         uuid.UUID `json:"uuid" gorm:"type:uuid;primaryKey"`
+	ID           int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID         uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
 	WarehouseID  int       `json:"warehouse_id" gorm:"not null"`
 	Warehouse    Warehouse `gorm:"foreignKey:WarehouseID;references:ID"`
 	MerchantID   int       `json:"merchant_id" gorm:"not null"`
