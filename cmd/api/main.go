@@ -65,10 +65,10 @@ func main() {
 	// Category module
 	categoryRepo := postgres.NewCategoryRepository(db)
 	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo, storageService)
-	// categoryHandler := handler.NewCategoryHandler(categoryUsecase, v)
+	categoryHandler := handler.NewCategoryHandler(categoryUsecase, v)
 
 	// Router
-	r := api.NewRouter(userHandler, jwtService)
+	r := api.NewRouter(userHandler, categoryHandler, jwtService)
 
 	// Server
 	if cfg.AppPort == "" {

@@ -10,7 +10,7 @@ import (
 	"github.com/kawe/warehouse_backend/pkg/response"
 )
 
-func NewRouter(userHandler *handler.UserHandler, jwtService jwt.JWTService) *gin.Engine {
+func NewRouter(userHandler *handler.UserHandler, categoryHandler *handler.CategoryHandler, jwtService jwt.JWTService) *gin.Engine {
 	router := gin.New()
 
 	router.Use(middleware.Logger())
@@ -32,6 +32,12 @@ func NewRouter(userHandler *handler.UserHandler, jwtService jwt.JWTService) *gin
 			users.GET("/:id", userHandler.GetByID)
 			users.PUT("/:id", userHandler.Update)
 			users.DELETE("/:id", userHandler.Delete)
+		}
+
+		categories := v1.Group("/categories")
+		categories.Use(middleware.AuthMiddleware(jwtService))
+		{
+			categories.POST("", categoryHandler.Create)
 		}
 	}
 

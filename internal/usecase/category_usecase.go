@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"io"
 
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
@@ -16,7 +17,17 @@ func NewCategoryUsecase(categoryRepo domain.CategoryRepository, storageService d
 	return &categoryUsecase{categoryRepo: categoryRepo, storageService: storageService}
 }
 
-func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category) error {
+func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category, file io.Reader, fileSize int64) error {
+	UUID := uuid.New()
+	fileName := UUID.String() + ".jpg"
+	imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
+	if err != nil {
+		return err
+	}
+
+	category.UUID = UUID
+	category.Icon = imageUrl
+
 	return u.categoryRepo.Create(ctx, category)
 }
 
