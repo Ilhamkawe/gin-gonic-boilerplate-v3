@@ -6,18 +6,47 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
+	"github.com/kawe/warehouse_backend/pkg/jwt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userUsecase struct {
 	userRepo       domain.UserRepository
 	contextTimeout time.Duration
+	jwtService     jwt.JWTService
 }
 
-func NewUserUsecase(ur domain.UserRepository, timeout time.Duration) domain.UserUsecase {
+func NewUserUsecase(ur domain.UserRepository, timeout time.Duration, jwtService jwt.JWTService) domain.UserUsecase {
 	return &userUsecase{
 		userRepo:       ur,
 		contextTimeout: timeout,
+		jwtService:     jwtService,
 	}
+}
+
+func (u *userUsecase) GenerateToken(id uuid.UUID) (string, error) {
+	return u.jwtService.GenerateToken(id)
+}
+
+func (u *userUsecase) Login(ctx context.Context, email string, password string) (*domain.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	user, err := u.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, domain.ErrNotFound
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return nil, domain.ErrUnauthorized
+	}
+
+	return user, nil
 }
 
 func (u *userUsecase) Create(ctx context.Context, user *domain.User) error {
@@ -30,6 +59,11 @@ func (u *userUsecase) Create(ctx context.Context, user *domain.User) error {
 		return domain.ErrConflict
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
 	user.UUID = uuid.New()
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
@@ -65,7 +99,11 @@ func (u *userUsecase) Update(ctx context.Context, user *domain.User) error {
 		existingUser.Name = user.Name
 	}
 	if user.Password != "" {
-		existingUser.Password = user.Password
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		existingUser.Password = string(hashedPassword)
 	}
 	existingUser.UpdatedAt = time.Now()
 

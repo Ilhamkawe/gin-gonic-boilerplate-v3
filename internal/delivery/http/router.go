@@ -6,10 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kawe/warehouse_backend/internal/delivery/http/handler"
 	"github.com/kawe/warehouse_backend/internal/delivery/http/middleware"
+	"github.com/kawe/warehouse_backend/pkg/jwt"
 	"github.com/kawe/warehouse_backend/pkg/response"
 )
 
-func NewRouter(userHandler *handler.UserHandler) *gin.Engine {
+func NewRouter(userHandler *handler.UserHandler, jwtService jwt.JWTService) *gin.Engine {
 	router := gin.New()
 
 	router.Use(middleware.Logger())
@@ -24,6 +25,7 @@ func NewRouter(userHandler *handler.UserHandler) *gin.Engine {
 	v1 := api.Group("/v1")
 	{
 		users := v1.Group("/users")
+		users.Use(middleware.AuthMiddleware(jwtService))
 		{
 			users.POST("", userHandler.Create)
 			users.GET("", userHandler.Fetch)

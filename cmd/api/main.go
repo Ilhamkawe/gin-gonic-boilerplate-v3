@@ -14,7 +14,9 @@ import (
 	"github.com/kawe/warehouse_backend/internal/infrastructure/database"
 	"github.com/kawe/warehouse_backend/internal/repository/postgres"
 	"github.com/kawe/warehouse_backend/internal/usecase"
+	"github.com/kawe/warehouse_backend/pkg/jwt"
 	"github.com/kawe/warehouse_backend/pkg/logger"
+	"github.com/kawe/warehouse_backend/pkg/minio"
 	"github.com/kawe/warehouse_backend/pkg/validator"
 )
 
@@ -43,14 +45,30 @@ func main() {
 	// Initialize dependencies
 	v := validator.NewCustomValidator()
 	timeout := time.Duration(10) * time.Second
+	jwtService := jwt.NewJWTService(cfg.JWTSecret)
+	storageService, err := minio.NewMinioService(
+		cfg.MinioEndpoint,
+		cfg.MinioAccessKey,
+		cfg.MinioSecretKey,
+		cfg.MinioBucketName,
+		cfg.MinioUseSSL,
+	)
+	if err != nil {
+		logger.Fatal(err, "Failed to initialize storage service")
+	}
 
 	// User module
 	userRepo := postgres.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepo, timeout)
+	userUsecase := usecase.NewUserUsecase(userRepo, timeout, jwtService)
 	userHandler := handler.NewUserHandler(userUsecase, v)
 
+	// Category module
+	categoryRepo := postgres.NewCategoryRepository(db)
+	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo, storageService)
+	// categoryHandler := handler.NewCategoryHandler(categoryUsecase, v)
+
 	// Router
-	r := api.NewRouter(userHandler)
+	r := api.NewRouter(userHandler, jwtService)
 
 	// Server
 	if cfg.AppPort == "" {

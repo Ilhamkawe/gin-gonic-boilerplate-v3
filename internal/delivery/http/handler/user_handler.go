@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
 	"github.com/kawe/warehouse_backend/internal/dto"
+	"github.com/kawe/warehouse_backend/pkg/jwt"
 	"github.com/kawe/warehouse_backend/pkg/response"
 	"github.com/kawe/warehouse_backend/pkg/validator"
 )
@@ -15,6 +16,7 @@ import (
 type UserHandler struct {
 	userUsecase domain.UserUsecase
 	validator   *validator.CustomValidator
+	jwtService  jwt.JWTService
 }
 
 func NewUserHandler(uu domain.UserUsecase, v *validator.CustomValidator) *UserHandler {
@@ -22,6 +24,51 @@ func NewUserHandler(uu domain.UserUsecase, v *validator.CustomValidator) *UserHa
 		userUsecase: uu,
 		validator:   v,
 	}
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var req dto.LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	if err := h.validator.Validate(req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
+		return
+	}
+
+	user, err := h.userUsecase.Login(c.Request.Context(), req.Email, req.Password)
+	if err != nil {
+		if err == domain.ErrNotFound {
+			response.Error(c, http.StatusNotFound, "User not found", nil)
+			return
+		}
+		if err == domain.ErrUnauthorized {
+			response.Error(c, http.StatusUnauthorized, "Invalid credentials", nil)
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, "Failed to login", err.Error())
+		return
+	}
+
+	token, err := h.userUsecase.GenerateToken(user.UUID)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to generate token", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "User logged in successfully", dto.LoginResponse{
+		User: dto.UserResponse{
+			ID:        user.ID,
+			UUID:      user.UUID,
+			Email:     user.Email,
+			Name:      user.Name,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		},
+		Token: token,
+	})
 }
 
 func (h *UserHandler) Create(c *gin.Context) {
