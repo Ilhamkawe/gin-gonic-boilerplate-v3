@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
 	"github.com/kawe/warehouse_backend/pkg/response"
 	"github.com/kawe/warehouse_backend/pkg/validator"
@@ -48,4 +49,44 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusCreated, "Category created successfully", category)
+}
+
+func (h *CategoryHandler) Update(c *gin.Context) {
+	var category domain.Category
+
+	// read value from queryparam
+	id := c.Param("uuid")
+	if id == "" {
+		response.Error(c, http.StatusBadRequest, "UUID is required", nil)
+		return
+	}
+
+	category.UUID = uuid.Must(uuid.Parse(id))
+
+	category.Name = c.PostForm("name")
+	category.Tagline = c.PostForm("tagline")
+
+	formJsonStr := c.PostForm("form_json")
+	if formJsonStr != "" {
+		category.FormJson = datatypes.JSON([]byte(formJsonStr))
+	}
+
+	// Lakukan validasi nama & tagline (karena c.PostForm tidak otomatis memicu validasi struct default)
+	if category.Name == "" {
+		response.Error(c, http.StatusBadRequest, "Name is required", nil)
+		return
+	}
+
+	file, header, err := c.Request.FormFile("icon")
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request body", err)
+		return
+	}
+
+	if err := h.categoryUsecase.Update(c, &category, file, header.Size); err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to update category", err)
+		return
+	}
+
+	response.Success(c, http.StatusCreated, "Category updated successfully", category)
 }

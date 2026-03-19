@@ -16,6 +16,11 @@ type User struct {
 	Photo      string       `json:"photo" gorm:"not null"`
 	Phone      string       `json:"phone" gorm:"not null"`
 	UserAccess []UserAccess `json:"user_access" gorm:"not null;foreignKey:UserID;references:ID"`
+	TenantID   int          `json:"tenant_id" gorm:"not null"`
+	Tenant     Tenant       `gorm:"foreignKey:TenantID;references:ID"`
+	CreatedBy  string       `json:"created_by" gorm:"not null"`
+	UpdatedBy  string       `json:"updated_by" gorm:""`
+	DeletedBy  string       `json:"deleted_by" gorm:""`
 	CreatedAt  time.Time    `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt  time.Time    `json:"updated_at"`
 	DeletedAt  time.Time    `json:"deleted_at"`
@@ -27,6 +32,7 @@ type UserRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]User, int64, error)
+	GetDetailByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }

@@ -24,6 +24,10 @@ type StockMovement struct {
 	Reason       string    `json:"reason" gorm:"not null"`
 	CreatedBy    int       `json:"created_by" gorm:"not null"`
 	User         User      `gorm:"foreignKey:CreatedBy;references:ID"`
+	TenantID     int       `json:"tenant_id" gorm:"not null"`
+	Tenant       Tenant    `gorm:"foreignKey:TenantID;references:ID"`
+	UpdatedBy    string    `json:"updated_by" gorm:""`
+	DeletedBy    string    `json:"deleted_by" gorm:""`
 	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	DeletedAt    time.Time `json:"deleted_at"`

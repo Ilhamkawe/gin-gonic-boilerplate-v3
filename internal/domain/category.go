@@ -16,6 +16,11 @@ type Category struct {
 	Icon      string         `json:"icon" gorm:"not null"`
 	Tagline   string         `json:"tagline" gorm:"not null"`
 	FormJson  datatypes.JSON `json:"form_json" gorm:"type:jsonb;not null"`
+	TenantID  int            `json:"tenant_id" gorm:"not null"`
+	Tenant    Tenant         `json:"tenant" gorm:"foreignKey:TenantID"`
+	CreatedBy string         `json:"created_by" gorm:""`
+	UpdatedBy string         `json:"updated_by" gorm:""`
+	DeletedBy string         `json:"deleted_by" gorm:""`
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt time.Time      `json:"deleted_at"`
@@ -34,6 +39,6 @@ type CategoryUseCase interface {
 	Create(ctx context.Context, category *Category, file io.Reader, fileSize int64) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Category, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Category, int64, error)
-	Update(ctx context.Context, category *Category) error
+	Update(ctx context.Context, category *Category, file io.Reader, fileSize int64) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }

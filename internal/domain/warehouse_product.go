@@ -15,6 +15,11 @@ type WarehouseProduct struct {
 	ProductID   int       `json:"product_id" gorm:"not null"`
 	Product     Product   `gorm:"foreignKey:ProductID;references:ID"`
 	Stock       int       `json:"stock" gorm:"not null"`
+	TenantID    int       `json:"tenant_id" gorm:"not null"`
+	Tenant      Tenant    `gorm:"foreignKey:TenantID;references:ID"`
+	CreatedBy   string    `json:"created_by" gorm:"not null"`
+	UpdatedBy   string    `json:"updated_by" gorm:""`
+	DeletedBy   string    `json:"deleted_by" gorm:""`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`

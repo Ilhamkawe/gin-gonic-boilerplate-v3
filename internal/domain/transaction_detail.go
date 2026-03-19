@@ -17,6 +17,11 @@ type TransactionDetail struct {
 	Quantity      int         `json:"quantity" gorm:"not null"`
 	Price         float64     `json:"price" gorm:"not null"`
 	SubTotal      float64     `json:"sub_total" gorm:"not null"`
+	TenantID      int         `json:"tenant_id" gorm:"not null"`
+	Tenant        Tenant      `gorm:"foreignKey:TenantID;references:ID"`
+	CreatedBy     string      `json:"created_by" gorm:"not null"`
+	UpdatedBy     string      `json:"updated_by" gorm:""`
+	DeletedBy     string      `json:"deleted_by" gorm:""`
 	CreatedAt     time.Time   `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt     time.Time   `json:"updated_at"`
 	DeletedAt     time.Time   `json:"deleted_at"`

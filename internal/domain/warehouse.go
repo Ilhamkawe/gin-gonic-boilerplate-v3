@@ -17,6 +17,11 @@ type Warehouse struct {
 	Photo     string    `json:"photo" gorm:"not null"`
 	ManagerId int       `json:"manager_id" gorm:"not null"`
 	Manager   User      `gorm:"foreignKey:ManagerId;references:ID"`
+	TenantID  int       `json:"tenant_id" gorm:"not null"`
+	Tenant    Tenant    `gorm:"foreignKey:TenantID;references:ID"`
+	CreatedBy string    `json:"created_by" gorm:"not null"`
+	UpdatedBy string    `json:"updated_by" gorm:""`
+	DeletedBy string    `json:"deleted_by" gorm:""`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt time.Time `json:"deleted_at"`

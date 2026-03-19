@@ -22,7 +22,7 @@ func (r *userRepository) Create(ctx context.Context, user *domain.User) error {
 
 func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	var user domain.User
-	err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error
+	err := r.db.WithContext(ctx).First(&user, "uuid = ?", id).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, domain.ErrNotFound
@@ -35,6 +35,25 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
 	err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, domain.ErrNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) GetDetailByEmail(ctx context.Context, email string) (*domain.User, error) {
+	var user domain.User
+
+	// Gunakan nested preload untuk mengambil data secara berantai (Cascading)
+	err := r.db.WithContext(ctx).
+		Preload("UserAccess").
+		Preload("UserAccess.Role").
+		Preload("UserAccess.Role.RolePermissions").
+		Preload("UserAccess.Role.RolePermissions.Permission").
+		First(&user, "email = ?", email).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, domain.ErrNotFound
@@ -63,7 +82,7 @@ func (r *userRepository) Fetch(ctx context.Context, limit int, offset int) ([]do
 }
 
 func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
-	result := r.db.WithContext(ctx).Model(user).Updates(user)
+	result := r.db.WithContext(ctx).Model(&domain.User{}).Where("uuid = ?", user.UUID).Updates(user)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -74,7 +93,7 @@ func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
 }
 
 func (r *userRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	result := r.db.WithContext(ctx).Delete(&domain.User{}, "id = ?", id)
+	result := r.db.WithContext(ctx).Delete(&domain.User{}, "uuid = ?", id)
 	if result.Error != nil {
 		return result.Error
 	}

@@ -39,7 +39,17 @@ func (u *categoryUsecase) Fetch(ctx context.Context, limit int, offset int) ([]d
 	return u.categoryRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category) error {
+func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category, file io.Reader, fileSize int64) error {
+	if file != nil {
+		UUID := uuid.New()
+		fileName := UUID.String() + ".jpg"
+		imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
+		if err != nil {
+			return err
+		}
+		category.Icon = imageUrl
+	}
+
 	return u.categoryRepo.Update(ctx, category)
 }
 

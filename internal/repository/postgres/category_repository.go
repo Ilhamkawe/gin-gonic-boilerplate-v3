@@ -33,7 +33,7 @@ func (r *categoryRepository) Fetch(ctx context.Context, limit int, offset int) (
 }
 
 func (r *categoryRepository) Update(ctx context.Context, category *domain.Category) error {
-	err := r.db.Save(category).Error
+	err := r.db.Where("uuid = ?", category.UUID).Updates(category).Error
 	return err
 }
 

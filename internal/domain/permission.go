@@ -13,6 +13,9 @@ type Permission struct {
 	Name        string    `json:"name" gorm:"not null"`
 	Module      string    `json:"module" gorm:"not null"`
 	Description string    `json:"description" gorm:"not null"`
+	CreatedBy   string    `json:"created_by" gorm:""`
+	UpdatedBy   string    `json:"updated_by" gorm:""`
+	DeletedBy   string    `json:"deleted_by" gorm:""`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`
