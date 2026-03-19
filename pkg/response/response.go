@@ -1,6 +1,8 @@
 package response
 
 import (
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,10 +31,26 @@ func Success(c *gin.Context, status int, message string, data interface{}) {
 }
 
 func Error(c *gin.Context, status int, message string, errors interface{}) {
+	var errResponse interface{}
+
+	if os.Getenv("APP_DEV_MODE") == "true" {
+		errResponse = errors
+	} else {
+		if status == 422 {
+			errResponse = errors
+		} else {
+			errResponse = nil
+		}
+	}
+
+	if status >= 500 {
+		log.Printf("[ERROR %d] %s: %v", status, message, errors)
+	}
+
 	c.JSON(status, Response{
 		Success: false,
 		Message: message,
-		Errors:  errors,
+		Errors:  errResponse,
 	})
 }
 

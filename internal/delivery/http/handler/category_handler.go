@@ -20,6 +20,22 @@ func NewCategoryHandler(categoryUsecase domain.CategoryUseCase, validator *valid
 	return &CategoryHandler{categoryUsecase: categoryUsecase, validator: validator}
 }
 
+func (h *CategoryHandler) Delete(c *gin.Context) {
+
+	id := c.Param("uuid")
+	if id == "" {
+		response.Error(c, http.StatusBadRequest, "UUID is required", nil)
+		return
+	}
+
+	if err := h.categoryUsecase.Delete(c, uuid.Must(uuid.Parse(id))); err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to delete category", err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Category deleted successfully", nil)
+}
+
 func (h *CategoryHandler) Create(c *gin.Context) {
 	var category domain.Category
 

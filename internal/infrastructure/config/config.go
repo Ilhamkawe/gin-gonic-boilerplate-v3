@@ -19,6 +19,7 @@ type Config struct {
 	MinioSecretKey  string `mapstructure:"MINIO_SECRET_KEY"`
 	MinioBucketName string `mapstructure:"MINIO_BUCKET_NAME"`
 	MinioUseSSL     bool   `mapstructure:"MINIO_USE_SSL"`
+	AppDevMode      bool   `mapstructure:"APP_DEV_MODE"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

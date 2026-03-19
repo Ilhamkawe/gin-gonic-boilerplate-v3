@@ -12,15 +12,15 @@ import (
 type Category struct {
 	ID        int            `json:"id" gorm:"primaryKey;autoIncrement;unique"`
 	UUID      uuid.UUID      `json:"uuid" gorm:"type:uuid;not null;unique"`
-	Name      string         `json:"name" gorm:"not null"`
-	Icon      string         `json:"icon" gorm:"not null"`
-	Tagline   string         `json:"tagline" gorm:"not null"`
+	Name      string         `json:"name" gorm:"not null;type:varchar(255)"`
+	Icon      string         `json:"icon" gorm:"not null;type:varchar(255)"`
+	Tagline   string         `json:"tagline" gorm:"not null;type:varchar(255)"`
 	FormJson  datatypes.JSON `json:"form_json" gorm:"type:jsonb;not null"`
 	TenantID  int            `json:"tenant_id" gorm:"not null"`
 	Tenant    Tenant         `json:"tenant" gorm:"foreignKey:TenantID"`
-	CreatedBy string         `json:"created_by" gorm:""`
-	UpdatedBy string         `json:"updated_by" gorm:""`
-	DeletedBy string         `json:"deleted_by" gorm:""`
+	CreatedBy string         `json:"created_by" gorm:"type:varchar(255);not null"`
+	UpdatedBy string         `json:"updated_by" gorm:"type:varchar(255)"`
+	DeletedBy string         `json:"deleted_by" gorm:"type:varchar(255)"`
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt time.Time      `json:"deleted_at"`

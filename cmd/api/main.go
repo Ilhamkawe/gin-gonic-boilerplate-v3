@@ -27,6 +27,10 @@ func main() {
 		logger.Fatal(err, "Failed to load config")
 	}
 
+	if cfg.AppDevMode {
+		os.Setenv("APP_DEV_MODE", "true")
+	}
+
 	// Connect to database
 	db, err := database.NewPostgresConn(cfg)
 	if err != nil {

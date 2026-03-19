@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,8 +10,8 @@ import (
 type Plan struct {
 	ID             int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
 	UUID           uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
-	Name           string    `json:"name" gorm:"not null"`
-	BilitCycle     string    `json:"bilit_cycle" gorm:"not null; type:enum('monthly','yearly')"`
+	Name           string    `json:"name" gorm:"not null; type:varchar(255)"`
+	BilitCycle     string    `json:"bilit_cycle" gorm:"not null; type:varchar(20)"`
 	Price          float64   `json:"price" gorm:"not null; type:decimal(10,2)"`
 	IsActive       bool      `json:"is_active" gorm:"not null;default:true"`
 	MaxWarehouse   int       `json:"max_warehouse" gorm:"not null"`
@@ -20,9 +21,9 @@ type Plan struct {
 	MaxTransaction int       `json:"max_transaction" gorm:"not null"`
 	Discount       float64   `json:"discount" gorm:"not null"`
 	PriceTotal     float64   `json:"price_total" gorm:"not null; type:decimal(10,2)"`
-	CreatedBy      string    `json:"created_by" gorm:""`
-	UpdatedBy      string    `json:"updated_by" gorm:""`
-	DeletedBy      string    `json:"deleted_by" gorm:""`
+	CreatedBy      string    `json:"created_by" gorm:"type:varchar(255);not null"`
+	UpdatedBy      string    `json:"updated_by" gorm:"type:varchar(255)"`
+	DeletedBy      string    `json:"deleted_by" gorm:"type:varchar(255)"`
 	CreatedAt      time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt      time.Time `json:"updated_at"`
 	DeletedAt      time.Time `json:"deleted_at"`
@@ -30,19 +31,19 @@ type Plan struct {
 }
 
 type PlanRepository interface {
-	CreatePlan(plan *Plan) error
-	UpdatePlan(plan *Plan) error
-	DeletePlan(plan *Plan) error
-	GetPlanByID(id int) (*Plan, error)
-	GetPlanByUUID(uuid uuid.UUID) (*Plan, error)
-	GetPlans() ([]Plan, error)
+	CreatePlan(ctx context.Context, plan *Plan) error
+	UpdatePlan(ctx context.Context, plan *Plan) error
+	DeletePlan(ctx context.Context, plan *Plan) error
+	GetPlanByID(ctx context.Context, id int) (*Plan, error)
+	GetPlanByUUID(ctx context.Context, uuid uuid.UUID) (*Plan, error)
+	GetPlans(ctx context.Context) ([]Plan, error)
 }
 
 type PlanService interface {
-	CreatePlan(plan *Plan) error
-	UpdatePlan(plan *Plan) error
-	DeletePlan(plan *Plan) error
-	GetPlanByID(id int) (*Plan, error)
-	GetPlanByUUID(uuid uuid.UUID) (*Plan, error)
-	GetPlans() ([]Plan, error)
+	CreatePlan(ctx context.Context, plan *Plan) error
+	UpdatePlan(ctx context.Context, plan *Plan) error
+	DeletePlan(ctx context.Context, plan *Plan) error
+	GetPlanByID(ctx context.Context, id int) (*Plan, error)
+	GetPlanByUUID(ctx context.Context, uuid uuid.UUID) (*Plan, error)
+	GetPlans(ctx context.Context) ([]Plan, error)
 }

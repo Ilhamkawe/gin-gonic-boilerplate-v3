@@ -10,18 +10,18 @@ import (
 type Warehouse struct {
 	ID        int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
 	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
-	Name      string    `json:"name" gorm:"not null"`
-	Address   string    `json:"address" gorm:"not null"`
-	Phone     string    `json:"phone" gorm:"not null"`
-	Email     string    `json:"email" gorm:"not null"`
-	Photo     string    `json:"photo" gorm:"not null"`
+	Name      string    `json:"name" gorm:"not null;type:varchar(255)"`
+	Address   string    `json:"address" gorm:"not null;type:varchar(255)"`
+	Phone     string    `json:"phone" gorm:"not null;type:varchar(15)"`
+	Email     string    `json:"email" gorm:"not null;type:varchar(255)"`
+	Photo     string    `json:"photo" gorm:"not null;type:varchar(255)"`
 	ManagerId int       `json:"manager_id" gorm:"not null"`
 	Manager   User      `gorm:"foreignKey:ManagerId;references:ID"`
 	TenantID  int       `json:"tenant_id" gorm:"not null"`
 	Tenant    Tenant    `gorm:"foreignKey:TenantID;references:ID"`
-	CreatedBy string    `json:"created_by" gorm:"not null"`
-	UpdatedBy string    `json:"updated_by" gorm:""`
-	DeletedBy string    `json:"deleted_by" gorm:""`
+	CreatedBy string    `json:"created_by" gorm:"type:varchar(255);not null"`
+	UpdatedBy string    `json:"updated_by" gorm:"type:varchar(255)"`
+	DeletedBy string    `json:"deleted_by" gorm:"type:varchar(255)"`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt time.Time `json:"deleted_at"`

@@ -15,12 +15,12 @@ type Transaction struct {
 	Total      float64   `json:"total" gorm:"not null"`
 	MerchantID int       `json:"merchant_id" gorm:"not null"`
 	Merchant   Merchant  `gorm:"foreignKey:MerchantID;references:ID"`
-	Status     string    `json:"status" gorm:"not null"`
+	Status     string    `json:"status" gorm:"not null;type:varchar(30)"`
 	TenantID   int       `json:"tenant_id" gorm:"not null"`
 	Tenant     Tenant    `gorm:"foreignKey:TenantID;references:ID"`
-	CreatedBy  string    `json:"created_by" gorm:"not null"`
-	UpdatedBy  string    `json:"updated_by" gorm:""`
-	DeletedBy  string    `json:"deleted_by" gorm:""`
+	CreatedBy  string    `json:"created_by" gorm:"type:varchar(255);not null"`
+	UpdatedBy  string    `json:"updated_by" gorm:"type:varchar(255)"`
+	DeletedBy  string    `json:"deleted_by" gorm:"type:varchar(255)"`
 	CreatedAt  time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt  time.Time `json:"updated_at"`
 	DeletedAt  time.Time `json:"deleted_at"`

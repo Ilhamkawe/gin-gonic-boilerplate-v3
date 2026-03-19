@@ -9,7 +9,7 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(userUUID uuid.UUID) (string, error)
+	GenerateToken(userUUID uuid.UUID, tenantID int) (string, error)
 	ValidateToken(tokenString string) (*jwt.Token, error)
 }
 
@@ -25,13 +25,14 @@ func NewJWTService(secretKey string) *jwtService {
 	}
 }
 
-type authCustomClaims struct {
+type AuthCustomClaims struct {
 	UserUUID uuid.UUID `json:"user_uuid"`
+	TenantID int       `json:"tenant_id"`
 	jwt.RegisteredClaims
 }
 
-func (j *jwtService) GenerateToken(userUUID uuid.UUID) (string, error) {
-	claims := &authCustomClaims{
+func (j *jwtService) GenerateToken(userUUID uuid.UUID, tenantID int) (string, error) {
+	claims := &AuthCustomClaims{
 		UserUUID: userUUID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    j.issuer,
@@ -44,7 +45,7 @@ func (j *jwtService) GenerateToken(userUUID uuid.UUID) (string, error) {
 }
 
 func (j *jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
-	return jwt.ParseWithClaims(tokenString, &authCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	return jwt.ParseWithClaims(tokenString, &AuthCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}

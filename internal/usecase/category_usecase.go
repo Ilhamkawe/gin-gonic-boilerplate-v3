@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"io"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
@@ -54,5 +55,17 @@ func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category,
 }
 
 func (u *categoryUsecase) Delete(ctx context.Context, id uuid.UUID) error {
+
+	category, err := u.categoryRepo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	fileName := strings.Split(category.Icon, "/")[len(strings.Split(category.Icon, "/"))-1]
+
+	if err := u.storageService.DeleteFile(ctx, fileName); err != nil {
+		return err
+	}
+
 	return u.categoryRepo.Delete(ctx, id)
 }

@@ -35,10 +35,11 @@ func NewRouter(userHandler *handler.UserHandler, categoryHandler *handler.Catego
 		}
 
 		categories := v1.Group("/categories")
-		// categories.Use(middleware.AuthMiddleware(jwtService))
+		categories.Use(middleware.AuthMiddleware(jwtService))
 		{
 			categories.POST("", categoryHandler.Create)
 			categories.PUT("/:uuid", categoryHandler.Update)
+			categories.DELETE("/:uuid", categoryHandler.Delete)
 		}
 
 	}
