@@ -41,3 +41,9 @@ func (r *categoryRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	err := r.db.Where("uuid = ?", id).Delete(&domain.Category{}).Error
 	return err
 }
+
+func (r *categoryRepository) GetInsight(ctx context.Context) (*domain.InsightCategory, error) {
+	var insight domain.InsightCategory
+	err := r.db.Model(&domain.Category{}).Select("count(*) as total_categories, count(CASE WHEN deleted_at IS NULL THEN 1 END) as active_categories, count(CASE WHEN deleted_at IS NOT NULL THEN 1 END) as inactive_categories").Scan(&insight).Error
+	return &insight, err
+}

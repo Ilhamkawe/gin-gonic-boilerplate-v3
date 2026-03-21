@@ -69,3 +69,7 @@ func (u *categoryUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 
 	return u.categoryRepo.Delete(ctx, id)
 }
+
+func (u *categoryUsecase) GetInsight(ctx context.Context) (*domain.InsightCategory, error) {
+	return u.categoryRepo.GetInsight(ctx)
+}

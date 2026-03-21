@@ -28,6 +28,7 @@ type User struct {
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
 	GetByID(ctx context.Context, id uuid.UUID) (*User, error)
+	GetByUUID(ctx context.Context, uuid uuid.UUID) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]User, int64, error)
 	GetDetailByEmail(ctx context.Context, email string) (*User, error)
@@ -43,4 +44,5 @@ type UserUsecase interface {
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	GenerateToken(ctx context.Context, id uuid.UUID) (string, error)
+	GetByUUID(ctx context.Context, uuid uuid.UUID) (*User, error)
 }

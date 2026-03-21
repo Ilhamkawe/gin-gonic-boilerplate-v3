@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kawe/warehouse_backend/internal/domain"
 )
 
 type UserResponse struct {
@@ -26,4 +27,23 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	Name     string `json:"name" validate:"omitempty"`
 	Password string `json:"password" validate:"omitempty,min=6"`
+}
+
+func FromUser(user domain.User) UserResponse {
+	return UserResponse{
+		ID:        user.ID,
+		UUID:      user.UUID,
+		Email:     user.Email,
+		Name:      user.Name,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+}
+
+func FromUsers(users []domain.User) []UserResponse {
+	userResponses := make([]UserResponse, 0)
+	for _, user := range users {
+		userResponses = append(userResponses, FromUser(user))
+	}
+	return userResponses
 }

@@ -71,8 +71,13 @@ func main() {
 	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo, storageService)
 	categoryHandler := handler.NewCategoryHandler(categoryUsecase, v)
 
+	// Tenant module
+	tenantRepo := postgres.NewTenantRepository(db)
+	tenantUsecase := usecase.NewTenantUseCase(tenantRepo, storageService)
+	tenantHandler := handler.NewTenantHandler(tenantUsecase, v)
+
 	// Router
-	r := api.NewRouter(userHandler, categoryHandler, jwtService)
+	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantHandler)
 
 	// Server
 	if cfg.AppPort == "" {

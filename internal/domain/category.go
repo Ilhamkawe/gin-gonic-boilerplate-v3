@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"gorm.io/datatypes"
 )
 
@@ -27,12 +28,19 @@ type Category struct {
 	LastSync  time.Time      `json:"last_sync"`
 }
 
+type InsightCategory struct {
+	ActiveCategories   int64 `json:"active_categories"`
+	TotalCategories    int64 `json:"total_categories"`
+	InactiveCategories int64 `json:"inactive_categories"`
+}
+
 type CategoryRepository interface {
 	Create(ctx context.Context, category *Category) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Category, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Category, int64, error)
 	Update(ctx context.Context, category *Category) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	GetInsight(ctx context.Context) (*InsightCategory, error)
 }
 
 type CategoryUseCase interface {
@@ -41,4 +49,5 @@ type CategoryUseCase interface {
 	Fetch(ctx context.Context, limit int, offset int) ([]Category, int64, error)
 	Update(ctx context.Context, category *Category, file io.Reader, fileSize int64) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	GetInsight(ctx context.Context) (*InsightCategory, error)
 }

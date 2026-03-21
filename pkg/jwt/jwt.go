@@ -51,3 +51,11 @@ func (j *jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
 		return j.secretKey, nil
 	})
 }
+
+func (j *jwtService) GetClaims(tokenString string) (*AuthCustomClaims, error) {
+	token, err := j.ValidateToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	return token.Claims.(*AuthCustomClaims), nil
+}

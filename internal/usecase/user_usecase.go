@@ -78,6 +78,13 @@ func (u *userUsecase) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, 
 	return u.userRepo.GetByID(ctx, id)
 }
 
+func (u *userUsecase) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
+	defer cancel()
+
+	return u.userRepo.GetByUUID(ctx, uuid)
+}
+
 func (u *userUsecase) Fetch(ctx context.Context, page int, limit int) ([]domain.User, int64, error) {
 	ctx, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()

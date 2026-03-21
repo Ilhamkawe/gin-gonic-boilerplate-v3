@@ -2,10 +2,12 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
+	"github.com/kawe/warehouse_backend/internal/dto"
 	"github.com/kawe/warehouse_backend/pkg/response"
 	"github.com/kawe/warehouse_backend/pkg/validator"
 	"gorm.io/datatypes"
@@ -37,7 +39,7 @@ func (h *CategoryHandler) Delete(c *gin.Context) {
 }
 
 func (h *CategoryHandler) Create(c *gin.Context) {
-	var category domain.Category
+	var category dto.CreateCategory
 
 	category.Name = c.PostForm("name")
 	category.Tagline = c.PostForm("tagline")
@@ -59,7 +61,13 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.categoryUsecase.Create(c, &category, file, header.Size); err != nil {
+	categoryDomain := domain.Category{
+		Name:     category.Name,
+		Tagline:  category.Tagline,
+		FormJson: category.FormJson,
+	}
+
+	if err := h.categoryUsecase.Create(c, &categoryDomain, file, header.Size); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create category", err)
 		return
 	}
@@ -68,7 +76,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 }
 
 func (h *CategoryHandler) Update(c *gin.Context) {
-	var category domain.Category
+	var category dto.UpdateCategory
 
 	// read value from queryparam
 	id := c.Param("uuid")
@@ -99,10 +107,66 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if err := h.categoryUsecase.Update(c, &category, file, header.Size); err != nil {
+	categoryDomain := domain.Category{
+		UUID:     category.UUID,
+		Name:     category.Name,
+		Tagline:  category.Tagline,
+		FormJson: category.FormJson,
+	}
+
+	if err := h.categoryUsecase.Update(c, &categoryDomain, file, header.Size); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update category", err)
 		return
 	}
 
 	response.Success(c, http.StatusCreated, "Category updated successfully", category)
+}
+
+func (h *CategoryHandler) Index(c *gin.Context) {
+	var categories []domain.Category
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+
+	categories, total, err := h.categoryUsecase.Fetch(c, limit, page)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to fetch category", err)
+		return
+	}
+
+	categoryResponses := dto.FromCategories(categories)
+
+	response.Paginate(c, http.StatusOK, "Category fetched successfully", response.PaginatedData{
+		Items:      categoryResponses,
+		Total:      total,
+		Page:       page,
+		Limit:      limit,
+		TotalPages: int((total + int64(limit) - 1) / int64(limit)),
+	})
+}
+
+func (h *CategoryHandler) GetInsight(c *gin.Context) {
+	insight, err := h.categoryUsecase.GetInsight(c)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to get insight", err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Insight fetched successfully", dto.FromInsightCategory(*insight))
+}
+
+func (h *CategoryHandler) GetByID(c *gin.Context) {
+	id := c.Param("uuid")
+	if id == "" {
+		response.Error(c, http.StatusBadRequest, "UUID is required", nil)
+		return
+	}
+
+	category, err := h.categoryUsecase.GetByID(c, uuid.Must(uuid.Parse(id)))
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to get category", err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Category fetched successfully", dto.FromCategory(*category))
 }

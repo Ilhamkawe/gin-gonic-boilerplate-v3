@@ -6,11 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kawe/warehouse_backend/internal/delivery/http/handler"
 	"github.com/kawe/warehouse_backend/internal/delivery/http/middleware"
+	"github.com/kawe/warehouse_backend/internal/domain"
 	"github.com/kawe/warehouse_backend/pkg/jwt"
 	"github.com/kawe/warehouse_backend/pkg/response"
 )
 
-func NewRouter(userHandler *handler.UserHandler, categoryHandler *handler.CategoryHandler, jwtService jwt.JWTService) *gin.Engine {
+func NewRouter(userHandler *handler.UserHandler,
+	categoryHandler *handler.CategoryHandler,
+	jwtService jwt.JWTService,
+	userUsecase domain.UserUsecase,
+	tenantHandler *handler.TenantHandler,
+) *gin.Engine {
 	router := gin.New()
 
 	router.Use(middleware.Logger())
@@ -31,7 +37,7 @@ func NewRouter(userHandler *handler.UserHandler, categoryHandler *handler.Catego
 		}
 
 		users := v1.Group("/users")
-		users.Use(middleware.AuthMiddleware(jwtService))
+		users.Use(middleware.AuthMiddleware(jwtService, userUsecase))
 		{
 			users.POST("", userHandler.Create)
 			users.GET("", userHandler.Fetch)
@@ -41,11 +47,20 @@ func NewRouter(userHandler *handler.UserHandler, categoryHandler *handler.Catego
 		}
 
 		categories := v1.Group("/categories")
-		categories.Use(middleware.AuthMiddleware(jwtService))
+		categories.Use(middleware.AuthMiddleware(jwtService, userUsecase))
 		{
 			categories.POST("", categoryHandler.Create)
 			categories.PUT("/:uuid", categoryHandler.Update)
 			categories.DELETE("/:uuid", categoryHandler.Delete)
+			categories.GET("/insight", categoryHandler.GetInsight)
+			categories.GET("", categoryHandler.Index)
+			categories.GET("/:uuid", categoryHandler.GetByID)
+		}
+
+		tanants := v1.Group("/tenants")
+		tanants.Use(middleware.AuthMiddleware(jwtService, userUsecase))
+		{
+			tanants.POST("", tenantHandler.Create)
 		}
 
 	}
