@@ -9,7 +9,7 @@ import (
 
 type MerchantProduct struct {
 	ID          int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID        uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
+	UUID        uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
 	MerchantID  int       `json:"merchant_id" gorm:"not null"`
 	Merchant    Merchant  `gorm:"foreignKey:MerchantID;references:ID"`
 	ProductID   int       `json:"product_id" gorm:"not null"`

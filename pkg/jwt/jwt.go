@@ -9,7 +9,7 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(userUUID uuid.UUID, tenantID int) (string, error)
+	GenerateToken(userUUID uuid.UUID) (string, error)
 	ValidateToken(tokenString string) (*jwt.Token, error)
 }
 
@@ -27,11 +27,10 @@ func NewJWTService(secretKey string) *jwtService {
 
 type AuthCustomClaims struct {
 	UserUUID uuid.UUID `json:"user_uuid"`
-	TenantID int       `json:"tenant_id"`
 	jwt.RegisteredClaims
 }
 
-func (j *jwtService) GenerateToken(userUUID uuid.UUID, tenantID int) (string, error) {
+func (j *jwtService) GenerateToken(userUUID uuid.UUID) (string, error) {
 	claims := &AuthCustomClaims{
 		UserUUID: userUUID,
 		RegisteredClaims: jwt.RegisteredClaims{

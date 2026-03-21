@@ -9,7 +9,7 @@ import (
 
 type Warehouse struct {
 	ID        int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
+	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
 	Name      string    `json:"name" gorm:"not null;type:varchar(255)"`
 	Address   string    `json:"address" gorm:"not null;type:varchar(255)"`
 	Phone     string    `json:"phone" gorm:"not null;type:varchar(15)"`

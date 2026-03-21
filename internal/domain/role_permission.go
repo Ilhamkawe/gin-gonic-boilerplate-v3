@@ -9,7 +9,7 @@ import (
 
 type RolePermission struct {
 	ID           int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID         uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
+	UUID         uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
 	RoleID       int
 	Role         Role `gorm:"foreignKey:RoleID;references:ID"`
 	PermissionID int

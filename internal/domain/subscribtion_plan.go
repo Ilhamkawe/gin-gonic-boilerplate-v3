@@ -9,7 +9,7 @@ import (
 
 type Plan struct {
 	ID             int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID           uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
+	UUID           uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
 	Name           string    `json:"name" gorm:"not null; type:varchar(255)"`
 	BilitCycle     string    `json:"bilit_cycle" gorm:"not null; type:varchar(20)"`
 	Price          float64   `json:"price" gorm:"not null; type:decimal(10,2)"`

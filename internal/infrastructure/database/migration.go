@@ -44,6 +44,7 @@ func Migrate(db *gorm.DB) error {
 		&domain.Tenant{},
 
 		// Entities dependent on the base entities
+		&domain.UserTenant{},
 		&domain.RolePermission{},
 		&domain.UserAccess{},
 		&domain.Warehouse{},

@@ -9,7 +9,7 @@ import (
 
 type AppPayment struct {
 	ID               int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID             uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique"`
+	UUID             uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
 	TenantID         int       `json:"tenant_id" gorm:"not null"`
 	Tenant           Tenant    `gorm:"foreignKey:TenantID;references:ID"`
 	PaymentStatus    string    `json:"payment_status" gorm:"not null; type:varchar(255)"`

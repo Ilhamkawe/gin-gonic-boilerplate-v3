@@ -28,7 +28,6 @@ func AuthMiddleware(jwtService jwt.JWTService) gin.HandlerFunc {
 
 		if claims, ok := token.Claims.(*jwt.AuthCustomClaims); ok && token.Valid {
 			c.Set("user_uuid", claims.UserUUID)
-			c.Set("tenant_id", claims.TenantID)
 		}
 
 		c.Next()

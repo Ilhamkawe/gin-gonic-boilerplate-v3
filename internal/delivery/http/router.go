@@ -24,6 +24,12 @@ func NewRouter(userHandler *handler.UserHandler, categoryHandler *handler.Catego
 	api := router.Group("/api")
 	v1 := api.Group("/v1")
 	{
+
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/login", userHandler.Login)
+		}
+
 		users := v1.Group("/users")
 		users.Use(middleware.AuthMiddleware(jwtService))
 		{

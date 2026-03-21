@@ -9,15 +9,13 @@ import (
 
 type User struct {
 	ID         int          `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID       uuid.UUID    `json:"uuid" gorm:"type:uuid;not null;unique"`
+	UUID       uuid.UUID    `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
 	Email      string       `json:"email" gorm:"unique;not null;type:varchar(255)"`
 	Password   string       `json:"-" gorm:"not null;type:varchar(255)"`
 	Name       string       `json:"name" gorm:"not null;type:varchar(255)"`
 	Photo      string       `json:"photo" gorm:"not null;type:varchar(255)"`
 	Phone      string       `json:"phone" gorm:"not null;type:varchar(15)"`
-	UserAccess []UserAccess `json:"user_access" gorm:"not null;foreignKey:UserID;references:ID"`
-	TenantID   int          `json:"tenant_id" gorm:"not null"`
-	Tenant     Tenant       `gorm:"foreignKey:TenantID;references:ID"`
+	UserTenant []UserTenant `json:"user_tenant" gorm:"not null;foreignKey:UserID;references:ID"`
 	CreatedBy  string       `json:"created_by" gorm:"not null;type:varchar(255)"`
 	UpdatedBy  string       `json:"updated_by" gorm:"type:varchar(255)"`
 	DeletedBy  string       `json:"deleted_by" gorm:"type:varchar(255)"`
@@ -44,5 +42,5 @@ type UserUsecase interface {
 	Fetch(ctx context.Context, page int, limit int) ([]User, int64, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	GenerateToken(ctx context.Context, id uuid.UUID, tenantID int) (string, error)
+	GenerateToken(ctx context.Context, id uuid.UUID) (string, error)
 }

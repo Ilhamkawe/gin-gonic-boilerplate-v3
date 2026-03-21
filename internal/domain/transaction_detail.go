@@ -9,7 +9,7 @@ import (
 
 type TransactionDetail struct {
 	ID            int         `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID          uuid.UUID   `json:"uuid" gorm:"type:uuid;not null;unique"`
+	UUID          uuid.UUID   `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
 	TransactionID int         `json:"transaction_id" gorm:"not null"`
 	Transaction   Transaction `gorm:"foreignKey:TransactionID;references:ID"`
 	ProductID     int         `json:"product_id" gorm:"not null"`

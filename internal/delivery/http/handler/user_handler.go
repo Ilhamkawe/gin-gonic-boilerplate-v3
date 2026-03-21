@@ -52,7 +52,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.userUsecase.GenerateToken(c.Request.Context(), user.UUID, user.TenantID)
+	token, err := h.userUsecase.GenerateToken(c.Request.Context(), user.UUID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to generate token", err.Error())
 		return
@@ -87,6 +87,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 		Name:     req.Name,
+		Phone:    req.Phone,
 	}
 
 	if err := h.userUsecase.Create(c.Request.Context(), user); err != nil {
