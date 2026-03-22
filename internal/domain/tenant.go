@@ -18,7 +18,7 @@ type Tenant struct {
 	Photo     string    `json:"photo" gorm:"not null;type:varchar(255)"`
 	OwnerId   int       `json:"owner_id" gorm:"not null"`
 	Owner     User      `gorm:"foreignKey:OwnerId;references:ID"`
-	Subdomain string    `json:"subdomain" gorm:"not null;type:varchar(255)"`
+	Subdomain string    `json:"subdomain" gorm:"not null;type:varchar(255);unique"`
 	CreatedBy string    `json:"created_by" gorm:"type:varchar(255);not null"`
 	UpdatedBy string    `json:"updated_by" gorm:"type:varchar(255)"`
 	DeletedBy string    `json:"deleted_by" gorm:"type:varchar(255)"`
@@ -35,6 +35,7 @@ type TenantRepository interface {
 	Update(ctx context.Context, tenant *Tenant) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error)
+	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
 }
 
 type TenantUseCase interface {
@@ -44,4 +45,6 @@ type TenantUseCase interface {
 	Update(ctx context.Context, tenant *Tenant, file io.Reader, fileSize int64) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error)
+	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
+	IsSubdomainExist(ctx context.Context, subdomain string) (bool, error)
 }

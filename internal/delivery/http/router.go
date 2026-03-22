@@ -37,13 +37,15 @@ func NewRouter(userHandler *handler.UserHandler,
 		}
 
 		users := v1.Group("/users")
-		users.Use(middleware.AuthMiddleware(jwtService, userUsecase))
+		users.Use(middleware.AuthMiddleware(jwtService, userUsecase), middleware.TenantAuthorization())
 		{
 			users.POST("", userHandler.Create)
 			users.GET("", userHandler.Fetch)
+			users.GET("/profile", userHandler.GetProfile)
 			users.GET("/:id", userHandler.GetByID)
 			users.PUT("/:id", userHandler.Update)
 			users.DELETE("/:id", userHandler.Delete)
+			users.GET("/debug", userHandler.Debug)
 		}
 
 		categories := v1.Group("/categories")

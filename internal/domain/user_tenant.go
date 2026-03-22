@@ -29,15 +29,16 @@ type UserTenant struct {
 type UserTenantRepository interface {
 	Create(ctx context.Context, userTenant *UserTenant) error
 	Update(ctx context.Context, userTenant *UserTenant) error
-	Delete(ctx context.Context, userTenant *UserTenant) error
+	Delete(ctx context.Context, id int) error
 	GetByID(ctx context.Context, id int) (*UserTenant, error)
 	GetAll(ctx context.Context) ([]UserTenant, error)
+	Fetch(ctx context.Context, limit int, offset int) ([]UserTenant, int64, error)
 }
 
 type UserTenantUseCase interface {
 	Create(ctx context.Context, userTenant *UserTenant) error
 	Update(ctx context.Context, userTenant *UserTenant) error
-	Delete(ctx context.Context, userTenant *UserTenant) error
+	Delete(ctx context.Context, id int) error
 	GetByID(ctx context.Context, id int) (*UserTenant, error)
 	GetAll(ctx context.Context) ([]UserTenant, error)
 }

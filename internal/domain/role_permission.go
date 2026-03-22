@@ -31,6 +31,7 @@ type RolePermissionRepository interface {
 	Fetch(ctx context.Context, limit int, offset int) ([]RolePermission, int64, error)
 	Update(ctx context.Context, rolePermission *RolePermission) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	BulkInsert(ctx context.Context, rolePermissions []RolePermission) error
 }
 
 type RolePermissionUseCasee interface {
@@ -39,4 +40,5 @@ type RolePermissionUseCasee interface {
 	Fetch(ctx context.Context, limit int, offset int) ([]RolePermission, int64, error)
 	Update(ctx context.Context, rolePermission *RolePermission) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	BulkInsert(ctx context.Context, rolePermissions []RolePermission) error
 }

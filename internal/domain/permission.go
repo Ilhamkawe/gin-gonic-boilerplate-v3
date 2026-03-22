@@ -20,6 +20,8 @@ type Permission struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`
 	LastSync    time.Time `json:"last_sync"`
+	IsAddon     bool      `json:"is_addon" gorm:"not null;default:false"`
+	AddonID     int       `json:"addon_id"`
 }
 
 type PermissionRepository interface {

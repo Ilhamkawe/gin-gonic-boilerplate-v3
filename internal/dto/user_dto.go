@@ -47,3 +47,30 @@ func FromUsers(users []domain.User) []UserResponse {
 	}
 	return userResponses
 }
+
+type UserProfileResponse struct {
+	ID        int                  `json:"id"`
+	UUID      uuid.UUID            `json:"uuid"`
+	Email     string               `json:"email"`
+	Name      string               `json:"name"`
+	CreatedAt time.Time            `json:"created_at"`
+	UpdatedAt time.Time            `json:"updated_at"`
+	Tenants   []UserTenantResponse `json:"tenants,omitempty"`
+}
+
+func FromUserProfile(user domain.User) UserProfileResponse {
+	res := UserProfileResponse{
+		ID:        user.ID,
+		UUID:      user.UUID,
+		Email:     user.Email,
+		Name:      user.Name,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	if len(user.UserTenant) > 0 {
+		res.Tenants = FromUserTenants(user.UserTenant)
+	}
+
+	return res
+}

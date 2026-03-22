@@ -55,3 +55,11 @@ func (t *tenantRepository) IsAuthroized(ctx context.Context, id uuid.UUID, tenan
 	}
 	return true, nil
 }
+
+func (t *tenantRepository) GetBySubdomain(ctx context.Context, subdomain string) (*domain.Tenant, error) {
+	var tenant domain.Tenant
+	if err := t.db.Where("subdomain = ?", subdomain).First(&tenant).Error; err != nil {
+		return nil, err
+	}
+	return &tenant, nil
+}

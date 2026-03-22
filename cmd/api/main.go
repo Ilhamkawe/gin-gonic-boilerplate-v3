@@ -71,9 +71,18 @@ func main() {
 	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo, storageService)
 	categoryHandler := handler.NewCategoryHandler(categoryUsecase, v)
 
+	// User Tenant
+	userTenantRepo := postgres.NewUserTenantRepository(db)
+	userTenantUsecase := usecase.NewUserTenantUseCase(userTenantRepo)
+
+	// Role module
+	roleRepo := postgres.NewRoleRepo(db)
+	roleUsecase := usecase.NewRoleUsecase(roleRepo)
+	// roleHandler := handler.NewRoleHandler(roleUsecase, v)
+
 	// Tenant module
 	tenantRepo := postgres.NewTenantRepository(db)
-	tenantUsecase := usecase.NewTenantUseCase(tenantRepo, storageService)
+	tenantUsecase := usecase.NewTenantUseCase(tenantRepo, userTenantUsecase, roleUsecase, storageService)
 	tenantHandler := handler.NewTenantHandler(tenantUsecase, v)
 
 	// Router

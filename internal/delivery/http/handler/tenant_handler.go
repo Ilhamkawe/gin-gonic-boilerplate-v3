@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kawe/warehouse_backend/internal/domain"
@@ -33,6 +34,12 @@ func (t *TenantHandler) Create(c *gin.Context) {
 		return
 	}
 
+	exist, _ := t.tenantUseCase.IsSubdomainExist(c, tenant.Subdomain)
+	if exist {
+		response.Error(c, http.StatusBadRequest, "Subdomain already exists", nil)
+		return
+	}
+
 	file, header, err := c.Request.FormFile("photo")
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request body", err)
@@ -43,9 +50,9 @@ func (t *TenantHandler) Create(c *gin.Context) {
 		Name:      tenant.Name,
 		Address:   tenant.Address,
 		Phone:     tenant.Phone,
-		Email:     tenant.Email,
+		Email:     strings.ToLower(tenant.Email),
 		Photo:     tenant.Photo,
-		Subdomain: tenant.Subdomain,
+		Subdomain: strings.ToLower(tenant.Subdomain),
 		OwnerId:   user.ID,
 	}
 
@@ -53,7 +60,10 @@ func (t *TenantHandler) Create(c *gin.Context) {
 		response.Error(c, http.StatusInternalServerError, "Internal Servr Error", err)
 		return
 	}
-	response.Success(c, http.StatusCreated, "Tenant created successfully", tenantDomain)
+
+	tenantResponse := dto.FromTenant(tenantDomain)
+
+	response.Success(c, http.StatusCreated, "Tenant created successfully", tenantResponse)
 }
 
 // func (t *TenantHandler) GetByID(c *gin.Context) {

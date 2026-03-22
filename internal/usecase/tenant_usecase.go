@@ -9,17 +9,19 @@ import (
 )
 
 type tentantUseCase struct {
-	tenantRepo     domain.TenantRepository
-	storageService domain.StorageService
+	tenantRepo        domain.TenantRepository
+	userTenantUseCase domain.UserTenantUseCase
+	roleUsecase       domain.RoleUsecase
+	storageService    domain.StorageService
 }
 
-func NewTenantUseCase(tenantRepo domain.TenantRepository, storageService domain.StorageService) domain.TenantUseCase {
-	return &tentantUseCase{tenantRepo: tenantRepo, storageService: storageService}
+func NewTenantUseCase(tenantRepo domain.TenantRepository, userTenantUseCase domain.UserTenantUseCase, roleUsecase domain.RoleUsecase, storageService domain.StorageService) domain.TenantUseCase {
+	return &tentantUseCase{tenantRepo: tenantRepo, userTenantUseCase: userTenantUseCase, roleUsecase: roleUsecase, storageService: storageService}
 }
 
 func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant, file io.Reader, fileSize int64) error {
 	UUID := uuid.New()
-	fileName := UUID.String() + ".jpg"
+	fileName := UUID.String() + "/" + "tenants/" + UUID.String() + ".jpg"
 	imageUrl, err := t.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
 	if err != nil {
 		return err
@@ -28,7 +30,34 @@ func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant, file
 	tenant.Photo = imageUrl
 	tenant.UUID = UUID
 
-	return t.tenantRepo.Create(ctx, tenant)
+	err = t.tenantRepo.Create(ctx, tenant)
+	if err != nil {
+		return err
+	}
+
+	role := domain.Role{
+		Name:     "owner",
+		UUID:     uuid.New(),
+		TenantID: tenant.ID,
+	}
+
+	err = t.roleUsecase.Create(ctx, &role)
+	if err != nil {
+		return err
+	}
+
+	userTenant := domain.UserTenant{
+		UserID:   tenant.OwnerId,
+		TenantID: tenant.ID,
+		RoleID:   role.ID,
+	}
+
+	err = t.userTenantUseCase.Create(ctx, &userTenant)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (t *tentantUseCase) GetByID(ctx context.Context, id uuid.UUID) (*domain.Tenant, error) {
@@ -59,4 +88,16 @@ func (t *tentantUseCase) Delete(ctx context.Context, id uuid.UUID) error {
 
 func (t *tentantUseCase) IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error) {
 	return t.tenantRepo.IsAuthroized(ctx, id, tenantID)
+}
+
+func (t *tentantUseCase) GetBySubdomain(ctx context.Context, subdomain string) (*domain.Tenant, error) {
+	return t.tenantRepo.GetBySubdomain(ctx, subdomain)
+}
+
+func (t *tentantUseCase) IsSubdomainExist(ctx context.Context, subdomain string) (bool, error) {
+	_, err := t.tenantRepo.GetBySubdomain(ctx, subdomain)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

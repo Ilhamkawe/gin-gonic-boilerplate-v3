@@ -65,6 +65,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 		Name:     category.Name,
 		Tagline:  category.Tagline,
 		FormJson: category.FormJson,
+		TenantID: c.MustGet("user").(*domain.User).UserTenant[0].ID,
 	}
 
 	if err := h.categoryUsecase.Create(c, &categoryDomain, file, header.Size); err != nil {

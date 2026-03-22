@@ -219,3 +219,41 @@ func (h *UserHandler) Delete(c *gin.Context) {
 
 	response.Success(c, http.StatusOK, "User deleted successfully", nil)
 }
+
+func (h *UserHandler) Debug(c *gin.Context) {
+	uuid := c.MustGet("user_uuid").(uuid.UUID)
+	// logger.Debug("User UUID", uuid)
+	user, err := h.userUsecase.GetByUUID(c.Request.Context(), uuid)
+
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to fetch user", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "User fetched successfully", dto.UserResponse{
+		ID:        user.ID,
+		UUID:      user.UUID,
+		Email:     user.Email,
+		Name:      user.Name,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	})
+}
+
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	userUUID, exists := c.Get("user_uuid")
+	if !exists {
+		response.Error(c, http.StatusUnauthorized, "Unauthorized", nil)
+		return
+	}
+
+	uuidParams := userUUID.(uuid.UUID)
+	user, err := h.userUsecase.GetByUUID(c.Request.Context(), uuidParams)
+
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to fetch user profile", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "User profile fetched successfully", dto.FromUserProfile(*user))
+}
