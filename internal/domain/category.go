@@ -36,10 +36,10 @@ type InsightCategory struct {
 
 type CategoryRepository interface {
 	Create(ctx context.Context, category *Category) error
-	GetByID(ctx context.Context, id uuid.UUID) (*Category, error)
+	GetByID(ctx context.Context, category *Category) (*Category, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Category, int64, error)
 	Update(ctx context.Context, category *Category) error
-	Delete(ctx context.Context, id uuid.UUID) error
+	Delete(ctx context.Context, category *Category) error
 	GetInsight(ctx context.Context) (*InsightCategory, error)
 }
 
@@ -50,4 +50,5 @@ type CategoryUseCase interface {
 	Update(ctx context.Context, category *Category, file io.Reader, fileSize int64) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetInsight(ctx context.Context) (*InsightCategory, error)
+	IsAvailable(ctx context.Context, uuid uuid.UUID) (bool, error)
 }

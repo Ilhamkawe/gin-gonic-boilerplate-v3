@@ -63,3 +63,11 @@ func (t *tenantRepository) GetBySubdomain(ctx context.Context, subdomain string)
 	}
 	return &tenant, nil
 }
+
+func (t *tenantRepository) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.Tenant, error) {
+	var tenant domain.Tenant
+	if err := t.db.Where("uuid = ?", uuid).First(&tenant).Error; err != nil {
+		return nil, err
+	}
+	return &tenant, nil
+}

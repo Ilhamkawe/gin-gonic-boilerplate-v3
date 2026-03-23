@@ -54,6 +54,7 @@ func (t *TenantHandler) Create(c *gin.Context) {
 		Photo:     tenant.Photo,
 		Subdomain: strings.ToLower(tenant.Subdomain),
 		OwnerId:   user.ID,
+		CreatedBy: user.UUID.String(),
 	}
 
 	if err := t.tenantUseCase.Create(c, &tenantDomain, file, header.Size); err != nil {

@@ -24,8 +24,8 @@ func NewUserUsecase(ur domain.UserRepository, timeout time.Duration, jwtService 
 	}
 }
 
-func (u *userUsecase) GenerateToken(ctx context.Context, id uuid.UUID) (string, error) {
-	return u.jwtService.GenerateToken(id)
+func (u *userUsecase) GenerateToken(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (string, error) {
+	return u.jwtService.GenerateToken(id, tenantID)
 }
 
 func (u *userUsecase) Login(ctx context.Context, email string, password string) (*domain.User, error) {

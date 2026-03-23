@@ -64,6 +64,9 @@ func Migrate(db *gorm.DB) error {
 		&domain.AppPayment{},
 		&domain.ProductAttribute{},
 		&domain.ProductDetails{},
+
+		// audit log
+		&domain.AuditLog{},
 	)
 
 	if err != nil {

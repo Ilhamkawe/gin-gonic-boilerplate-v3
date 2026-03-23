@@ -8,24 +8,25 @@ import (
 )
 
 type Product struct {
-	ID          int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID        uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
-	Name        string    `json:"name" gorm:"not null;type:varchar(255)"`
-	Thumbnail   string    `json:"icon" gorm:"not null"`
-	Description string    `json:"description" gorm:"not null"`
-	Price       int       `json:"price" gorm:"not null"`
-	CategoryID  int       `json:"category_id" gorm:"not null"`
-	Category    Category  `gorm:"foreignKey:CategoryID;references:ID"`
-	IsPopular   bool      `json:"is_popular" gorm:"not null"`
-	TenantID    int       `json:"tenant_id" gorm:"not null"`
-	Tenant      Tenant    `gorm:"foreignKey:TenantID;references:ID"`
-	CreatedBy   string    `json:"created_by" gorm:"type:varchar(255);not null"`
-	UpdatedBy   string    `json:"updated_by" gorm:"type:varchar(255)"`
-	DeletedBy   string    `json:"deleted_by" gorm:"type:varchar(255)"`
-	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	DeletedAt   time.Time `json:"deleted_at"`
-	LastSync    time.Time `json:"last_sync"`
+	ID            int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID          uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
+	Name          string    `json:"name" gorm:"not null;type:varchar(255)"`
+	Thumbnail     string    `json:"icon" gorm:"not null"`
+	Description   string    `json:"description" gorm:"not null"`
+	Price         int       `json:"price" gorm:"not null"`
+	CategoryID    int       `json:"category_id" gorm:"not null"`
+	Category      Category  `gorm:"foreignKey:CategoryID;references:ID"`
+	IsPopular     bool      `json:"is_popular" gorm:"not null"`
+	TenantID      int       `json:"tenant_id" gorm:"not null"`
+	Tenant        Tenant    `gorm:"foreignKey:TenantID;references:ID"`
+	AttributeJson string    `json:"attribute_json" gorm:"type:jsonb"`
+	CreatedBy     string    `json:"created_by" gorm:"type:varchar(255);not null"`
+	UpdatedBy     string    `json:"updated_by" gorm:"type:varchar(255)"`
+	DeletedBy     string    `json:"deleted_by" gorm:"type:varchar(255)"`
+	CreatedAt     time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	DeletedAt     time.Time `json:"deleted_at"`
+	LastSync      time.Time `json:"last_sync"`
 }
 
 type ProductRepository interface {

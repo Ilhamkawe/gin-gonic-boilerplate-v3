@@ -31,7 +31,7 @@ func (h *CategoryHandler) Delete(c *gin.Context) {
 	}
 
 	if err := h.categoryUsecase.Delete(c, uuid.Must(uuid.Parse(id))); err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to delete category", err)
+		response.Error(c, http.StatusInternalServerError, "Failed to delete category", err.Error())
 		return
 	}
 
@@ -41,9 +41,9 @@ func (h *CategoryHandler) Delete(c *gin.Context) {
 func (h *CategoryHandler) Create(c *gin.Context) {
 	var category dto.CreateCategory
 
+	category.TenantID = c.MustGet("tenant_id").(int)
 	category.Name = c.PostForm("name")
 	category.Tagline = c.PostForm("tagline")
-
 	formJsonStr := c.PostForm("form_json")
 	if formJsonStr != "" {
 		category.FormJson = datatypes.JSON([]byte(formJsonStr))
@@ -61,11 +61,14 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 		return
 	}
 
+	user_uuid := c.MustGet("user_uuid").(uuid.UUID).String()
+
 	categoryDomain := domain.Category{
-		Name:     category.Name,
-		Tagline:  category.Tagline,
-		FormJson: category.FormJson,
-		TenantID: c.MustGet("user").(*domain.User).UserTenant[0].ID,
+		Name:      category.Name,
+		Tagline:   category.Tagline,
+		FormJson:  category.FormJson,
+		TenantID:  category.TenantID,
+		CreatedBy: user_uuid,
 	}
 
 	if err := h.categoryUsecase.Create(c, &categoryDomain, file, header.Size); err != nil {
@@ -108,11 +111,14 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
+	user_uuid := c.MustGet("user_uuid").(uuid.UUID).String()
+
 	categoryDomain := domain.Category{
-		UUID:     category.UUID,
-		Name:     category.Name,
-		Tagline:  category.Tagline,
-		FormJson: category.FormJson,
+		UUID:      category.UUID,
+		Name:      category.Name,
+		Tagline:   category.Tagline,
+		FormJson:  category.FormJson,
+		UpdatedBy: user_uuid,
 	}
 
 	if err := h.categoryUsecase.Update(c, &categoryDomain, file, header.Size); err != nil {

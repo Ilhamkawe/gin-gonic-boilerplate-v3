@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"io"
 	"strings"
 
@@ -33,7 +34,7 @@ func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category,
 }
 
 func (u *categoryUsecase) GetByID(ctx context.Context, id uuid.UUID) (*domain.Category, error) {
-	return u.categoryRepo.GetByID(ctx, id)
+	return u.categoryRepo.GetByID(ctx, &domain.Category{UUID: id})
 }
 
 func (u *categoryUsecase) Fetch(ctx context.Context, limit int, offset int) ([]domain.Category, int64, error) {
@@ -54,11 +55,19 @@ func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category,
 	return u.categoryRepo.Update(ctx, category)
 }
 
-func (u *categoryUsecase) Delete(ctx context.Context, id uuid.UUID) error {
+func (u *categoryUsecase) Delete(ctx context.Context, uuid uuid.UUID) error {
 
-	category, err := u.categoryRepo.GetByID(ctx, id)
+	category, err := u.categoryRepo.GetByID(ctx, &domain.Category{
+		UUID:     uuid,
+		TenantID: ctx.Value("tenant_id").(int),
+	})
+
 	if err != nil {
 		return err
+	}
+
+	if category.ID == 0 {
+		return errors.New("category not found")
 	}
 
 	fileName := strings.Split(category.Icon, "/")[len(strings.Split(category.Icon, "/"))-1]
@@ -67,9 +76,23 @@ func (u *categoryUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 
-	return u.categoryRepo.Delete(ctx, id)
+	return u.categoryRepo.Delete(ctx, category)
 }
 
 func (u *categoryUsecase) GetInsight(ctx context.Context) (*domain.InsightCategory, error) {
 	return u.categoryRepo.GetInsight(ctx)
+}
+
+func (u *categoryUsecase) IsAvailable(ctx context.Context, uuid uuid.UUID) (bool, error) {
+	category, err := u.categoryRepo.GetByID(ctx, &domain.Category{UUID: uuid})
+
+	if err != nil {
+		return false, err
+	}
+
+	if category.ID == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }

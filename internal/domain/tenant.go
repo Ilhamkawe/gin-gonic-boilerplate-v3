@@ -36,6 +36,7 @@ type TenantRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error)
 	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
+	GetByUUID(ctx context.Context, uuid uuid.UUID) (*Tenant, error)
 }
 
 type TenantUseCase interface {
@@ -47,4 +48,5 @@ type TenantUseCase interface {
 	IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error)
 	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
 	IsSubdomainExist(ctx context.Context, subdomain string) (bool, error)
+	GetByUUID(ctx context.Context, uuid uuid.UUID) (*Tenant, error)
 }

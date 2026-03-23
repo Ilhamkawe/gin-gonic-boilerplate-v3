@@ -31,6 +31,7 @@ type CreateCategory struct {
 	Icon     string         `form:"icon"`
 	Tagline  string         `form:"tagline"`
 	FormJson datatypes.JSON `form:"form_json"`
+	TenantID int            `header:"X-Tenant-ID"`
 }
 
 type UpdateCategory struct {

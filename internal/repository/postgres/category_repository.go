@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
 	"gorm.io/gorm"
 )
@@ -20,10 +19,9 @@ func (r *categoryRepository) Create(ctx context.Context, category *domain.Catego
 	return r.db.Create(category).Error
 }
 
-func (r *categoryRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Category, error) {
-	var category domain.Category
-	err := r.db.Where("uuid = ?", id).First(&category).Error
-	return &category, err
+func (r *categoryRepository) GetByID(ctx context.Context, category *domain.Category) (*domain.Category, error) {
+	err := r.db.Where("uuid = ? AND tenant_id = ?", category.UUID, category.TenantID).First(category).Error
+	return category, err
 }
 
 func (r *categoryRepository) Fetch(ctx context.Context, limit int, offset int) ([]domain.Category, int64, error) {
@@ -37,8 +35,8 @@ func (r *categoryRepository) Update(ctx context.Context, category *domain.Catego
 	return err
 }
 
-func (r *categoryRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	err := r.db.Where("uuid = ?", id).Delete(&domain.Category{}).Error
+func (r *categoryRepository) Delete(ctx context.Context, category *domain.Category) error {
+	err := r.db.Where("uuid = ? AND tenant_id = ?", category.UUID, category.TenantID).Delete(&domain.Category{}).Error
 	return err
 }
 

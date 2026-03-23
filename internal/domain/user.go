@@ -43,6 +43,6 @@ type UserUsecase interface {
 	Fetch(ctx context.Context, page int, limit int) ([]User, int64, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	GenerateToken(ctx context.Context, id uuid.UUID) (string, error)
+	GenerateToken(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (string, error)
 	GetByUUID(ctx context.Context, uuid uuid.UUID) (*User, error)
 }

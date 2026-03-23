@@ -36,9 +36,10 @@ func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant, file
 	}
 
 	role := domain.Role{
-		Name:     "owner",
-		UUID:     uuid.New(),
-		TenantID: tenant.ID,
+		Name:      "owner",
+		UUID:      uuid.New(),
+		TenantID:  tenant.ID,
+		CreatedBy: tenant.CreatedBy,
 	}
 
 	err = t.roleUsecase.Create(ctx, &role)
@@ -47,9 +48,10 @@ func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant, file
 	}
 
 	userTenant := domain.UserTenant{
-		UserID:   tenant.OwnerId,
-		TenantID: tenant.ID,
-		RoleID:   role.ID,
+		UserID:    tenant.OwnerId,
+		TenantID:  tenant.ID,
+		RoleID:    role.ID,
+		CreatedBy: tenant.CreatedBy,
 	}
 
 	err = t.userTenantUseCase.Create(ctx, &userTenant)
@@ -71,7 +73,7 @@ func (t *tentantUseCase) Fetch(ctx context.Context, limit int, offset int) ([]do
 func (t *tentantUseCase) Update(ctx context.Context, tenant *domain.Tenant, file io.Reader, fileSize int64) error {
 	if file != nil {
 		UUID := uuid.New()
-		fileName := UUID.String() + ".jpg"
+		fileName := UUID.String() + "/" + "tenants/" + UUID.String() + ".jpg"
 		imageUrl, err := t.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
 		if err != nil {
 			return err
@@ -100,4 +102,8 @@ func (t *tentantUseCase) IsSubdomainExist(ctx context.Context, subdomain string)
 		return false, err
 	}
 	return true, nil
+}
+
+func (t *tentantUseCase) GetByUUID(ctx context.Context, uuid uuid.UUID) (*domain.Tenant, error) {
+	return t.tenantRepo.GetByUUID(ctx, uuid)
 }

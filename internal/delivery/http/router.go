@@ -15,7 +15,10 @@ func NewRouter(userHandler *handler.UserHandler,
 	categoryHandler *handler.CategoryHandler,
 	jwtService jwt.JWTService,
 	userUsecase domain.UserUsecase,
+	tenantUsecase domain.TenantUseCase,
 	tenantHandler *handler.TenantHandler,
+	auditLogUsecase domain.AuditLogUsecase,
+	authHandler *handler.AuthorizationHandler,
 ) *gin.Engine {
 	router := gin.New()
 
@@ -32,12 +35,20 @@ func NewRouter(userHandler *handler.UserHandler,
 	{
 
 		auth := v1.Group("/auth")
+		auth.Use(middleware.AutoMutationAudit(auditLogUsecase))
 		{
-			auth.POST("/login", userHandler.Login)
+			auth.POST("/login", authHandler.Login)
+
+			protectedRoute := auth.Use(
+				middleware.AuthMiddleware(jwtService, userUsecase),
+				middleware.TenantAuthorization(tenantUsecase))
+			{
+				protectedRoute.POST("/tenant", authHandler.AuthorizationToTenant)
+			}
 		}
 
 		users := v1.Group("/users")
-		users.Use(middleware.AuthMiddleware(jwtService, userUsecase), middleware.TenantAuthorization())
+		users.Use(middleware.AuthMiddleware(jwtService, userUsecase))
 		{
 			users.POST("", userHandler.Create)
 			users.GET("", userHandler.Fetch)
@@ -49,7 +60,11 @@ func NewRouter(userHandler *handler.UserHandler,
 		}
 
 		categories := v1.Group("/categories")
-		categories.Use(middleware.AuthMiddleware(jwtService, userUsecase))
+		categories.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.TenantAuthorization(tenantUsecase),
+			middleware.TenantTokenMatch(),
+			middleware.AutoMutationAudit(auditLogUsecase))
 		{
 			categories.POST("", categoryHandler.Create)
 			categories.PUT("/:uuid", categoryHandler.Update)
@@ -60,7 +75,9 @@ func NewRouter(userHandler *handler.UserHandler,
 		}
 
 		tanants := v1.Group("/tenants")
-		tanants.Use(middleware.AuthMiddleware(jwtService, userUsecase))
+		tanants.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.AutoMutationAudit(auditLogUsecase))
 		{
 			tanants.POST("", tenantHandler.Create)
 		}

@@ -85,8 +85,15 @@ func main() {
 	tenantUsecase := usecase.NewTenantUseCase(tenantRepo, userTenantUsecase, roleUsecase, storageService)
 	tenantHandler := handler.NewTenantHandler(tenantUsecase, v)
 
+	// Audit Log
+	auditLogRepo := postgres.NewAuditLogRepository(db)
+	auditLogUsecase := usecase.NewAuditLogUsecase(auditLogRepo)
+
+	// Authorization handler
+	authorizationHandler := handler.NewAuthorizationHandler(jwtService, userUsecase, v)
+
 	// Router
-	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantHandler)
+	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantUsecase, tenantHandler, auditLogUsecase, authorizationHandler)
 
 	// Server
 	if cfg.AppPort == "" {
