@@ -52,14 +52,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusCreated, "User created successfully", dto.UserResponse{
-		ID:        user.ID,
-		UUID:      user.UUID,
-		Email:     user.Email,
-		Name:      user.Name,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	})
+	response.Success(c, http.StatusCreated, "User created successfully", dto.FromUser(*user))
 }
 
 func (h *UserHandler) GetByID(c *gin.Context) {
@@ -80,37 +73,22 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, "User fetched successfully", dto.UserResponse{
-		ID:        user.ID,
-		UUID:      user.UUID,
-		Email:     user.Email,
-		Name:      user.Name,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	})
+	response.Success(c, http.StatusOK, "User fetched successfully", dto.FromUser(*user))
 }
 
 func (h *UserHandler) Fetch(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	users, total, err := h.userUsecase.Fetch(c.Request.Context(), page, limit)
+	offset := (page - 1) * limit
+
+	users, total, err := h.userUsecase.Fetch(c.Request.Context(), offset, limit)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to fetch users", err.Error())
 		return
 	}
 
-	userResponses := make([]dto.UserResponse, 0)
-	for _, user := range users {
-		userResponses = append(userResponses, dto.UserResponse{
-			ID:        user.ID,
-			UUID:      user.UUID,
-			Email:     user.Email,
-			Name:      user.Name,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-		})
-	}
+	userResponses := dto.FromUsers(users)
 
 	response.Paginate(c, http.StatusOK, "Users fetched successfully", response.PaginatedData{
 		Items:      userResponses,
@@ -183,14 +161,7 @@ func (h *UserHandler) Debug(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusOK, "User fetched successfully", dto.UserResponse{
-		ID:        user.ID,
-		UUID:      user.UUID,
-		Email:     user.Email,
-		Name:      user.Name,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	})
+	response.Success(c, http.StatusOK, "User fetched successfully", dto.FromUser(*user))
 }
 
 func (h *UserHandler) GetProfile(c *gin.Context) {

@@ -39,18 +39,12 @@ func (h *AuthorizationHandler) AuthorizationToTenant(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, "Tenant Access Granted", dto.LoginResponse{
-		User: dto.UserResponse{
-			ID:        user.ID,
-			UUID:      user.UUID,
-			Email:     user.Email,
-			Name:      user.Name,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-		},
+		User:  dto.FromUser(*user),
 		Token: token,
 	})
 
 }
+
 
 func (h *AuthorizationHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
@@ -85,14 +79,8 @@ func (h *AuthorizationHandler) Login(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, "User logged in successfully", dto.LoginResponse{
-		User: dto.UserResponse{
-			ID:        user.ID,
-			UUID:      user.UUID,
-			Email:     user.Email,
-			Name:      user.Name,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-		},
+		User:  dto.FromUser(*user),
 		Token: token,
 	})
 }
+

@@ -9,21 +9,21 @@ import (
 )
 
 type CategoryDTO struct {
-	UUID      uuid.UUID `json:"uuid"`
-	Name      string    `json:"name"`
-	Icon      string    `json:"icon"`
-	FormJson  string    `json:"form_json"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UUID      uuid.UUID  `json:"uuid"`
+	Name      string     `json:"name"`
+	Icon      string     `json:"icon"`
+	FormJson  string     `json:"form_json"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
 }
 
 type CategoryResponse struct {
-	UUID      uuid.UUID `json:"uuid"`
-	Name      string    `json:"name"`
-	Icon      string    `json:"icon"`
-	FormJson  string    `json:"form_json"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UUID      uuid.UUID  `json:"uuid"`
+	Name      string     `json:"name"`
+	Icon      string     `json:"icon"`
+	FormJson  string     `json:"form_json"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
 }
 
 type CreateCategory struct {
@@ -46,6 +46,36 @@ type InsightCategoryDTO struct {
 	ActiveCategories   int64 `json:"active_categories"`
 	TotalCategories    int64 `json:"total_categories"`
 	InactiveCategories int64 `json:"inactive_categories"`
+}
+
+type CategoryWithProductCountDTO struct {
+	ID           int        `json:"id"`
+	UUID         uuid.UUID  `json:"uuid"`
+	Name         string     `json:"name"`
+	Icon         string     `json:"icon"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    *time.Time `json:"updated_at"`
+	ProductCount int64      `json:"product_count"`
+}
+
+func FromCategoryWithProductCount(category domain.CategoryWithCount) CategoryWithProductCountDTO {
+	return CategoryWithProductCountDTO{
+		ID:           category.ID,
+		UUID:         category.UUID,
+		Name:         category.Name,
+		Icon:         category.Icon,
+		CreatedAt:    category.CreatedAt,
+		UpdatedAt:    category.UpdatedAt,
+		ProductCount: category.ProductCount,
+	}
+}
+
+func FromCategoriesWithProductCount(categories []domain.CategoryWithCount) []CategoryWithProductCountDTO {
+	categoryResponses := make([]CategoryWithProductCountDTO, 0)
+	for _, category := range categories {
+		categoryResponses = append(categoryResponses, FromCategoryWithProductCount(category))
+	}
+	return categoryResponses
 }
 
 func FromCategory(category domain.Category) CategoryResponse {

@@ -96,3 +96,7 @@ func (u *categoryUsecase) IsAvailable(ctx context.Context, uuid uuid.UUID) (bool
 
 	return true, nil
 }
+
+func (u *categoryUsecase) FetchWithProductCount(ctx context.Context, tenantID int) ([]domain.CategoryWithCount, error) {
+	return u.categoryRepo.FetchWithProductCount(ctx, tenantID)
+}

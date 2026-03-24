@@ -23,9 +23,14 @@ type Category struct {
 	UpdatedBy string         `json:"updated_by" gorm:"type:varchar(255)"`
 	DeletedBy string         `json:"deleted_by" gorm:"type:varchar(255)"`
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt time.Time      `json:"deleted_at"`
-	LastSync  time.Time      `json:"last_sync"`
+	UpdatedAt *time.Time     `json:"updated_at"`
+	DeletedAt *time.Time     `json:"deleted_at"`
+	LastSync  *time.Time     `json:"last_sync"`
+}
+
+type CategoryWithCount struct {
+	Category
+	ProductCount int64 `json:"product_count"`
 }
 
 type InsightCategory struct {
@@ -41,6 +46,7 @@ type CategoryRepository interface {
 	Update(ctx context.Context, category *Category) error
 	Delete(ctx context.Context, category *Category) error
 	GetInsight(ctx context.Context) (*InsightCategory, error)
+	FetchWithProductCount(ctx context.Context, tenantID int) ([]CategoryWithCount, error)
 }
 
 type CategoryUseCase interface {
@@ -51,4 +57,5 @@ type CategoryUseCase interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetInsight(ctx context.Context) (*InsightCategory, error)
 	IsAvailable(ctx context.Context, uuid uuid.UUID) (bool, error)
+	FetchWithProductCount(ctx context.Context, tenantID int) ([]CategoryWithCount, error)
 }

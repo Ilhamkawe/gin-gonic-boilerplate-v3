@@ -12,9 +12,10 @@ type UserResponse struct {
 	UUID      uuid.UUID `json:"uuid"`
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
 }
+
 
 type CreateUserRequest struct {
 	Email    string `json:"email" validate:"required,email"`
@@ -54,9 +55,10 @@ type UserProfileResponse struct {
 	Email     string               `json:"email"`
 	Name      string               `json:"name"`
 	CreatedAt time.Time            `json:"created_at"`
-	UpdatedAt time.Time            `json:"updated_at"`
+	UpdatedAt *time.Time           `json:"updated_at"`
 	Tenants   []UserTenantResponse `json:"tenants,omitempty"`
 }
+
 
 func FromUserProfile(user domain.User) UserProfileResponse {
 	res := UserProfileResponse{

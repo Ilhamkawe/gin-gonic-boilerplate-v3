@@ -26,12 +26,12 @@ func (r *categoryRepository) GetByID(ctx context.Context, category *domain.Categ
 
 func (r *categoryRepository) Fetch(ctx context.Context, limit int, offset int) ([]domain.Category, int64, error) {
 	var categories []domain.Category
-	err := r.db.Limit(limit).Offset(offset).Find(&categories).Error
+	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", ctx.Value("tenant_id").(int)).Limit(limit).Offset(offset).Find(&categories).Error
 	return categories, int64(len(categories)), err
 }
 
 func (r *categoryRepository) Update(ctx context.Context, category *domain.Category) error {
-	err := r.db.Where("uuid = ?", category.UUID).Updates(category).Error
+	err := r.db.Where("uuid = ? AND tenant_id = ?", category.UUID, category.TenantID).Updates(category).Error
 	return err
 }
 
@@ -44,4 +44,15 @@ func (r *categoryRepository) GetInsight(ctx context.Context) (*domain.InsightCat
 	var insight domain.InsightCategory
 	err := r.db.Model(&domain.Category{}).Select("count(*) as total_categories, count(CASE WHEN deleted_at IS NULL THEN 1 END) as active_categories, count(CASE WHEN deleted_at IS NOT NULL THEN 1 END) as inactive_categories").Scan(&insight).Error
 	return &insight, err
+}
+
+func (r *categoryRepository) FetchWithProductCount(ctx context.Context, tenantID int) ([]domain.CategoryWithCount, error) {
+	var results []domain.CategoryWithCount
+	err := r.db.Table("categories").
+		Select("categories.*, COUNT(products.category_id) as product_count").
+		Joins("LEFT JOIN products ON products.category_id = categories.id").
+		Where("categories.tenant_id = ? AND categories.deleted_at IS NULL", tenantID).
+		Group("categories.id").
+		Scan(&results).Error
+	return results, err
 }

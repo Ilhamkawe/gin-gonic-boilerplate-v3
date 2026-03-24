@@ -70,6 +70,7 @@ func NewRouter(userHandler *handler.UserHandler,
 			categories.PUT("/:uuid", categoryHandler.Update)
 			categories.DELETE("/:uuid", categoryHandler.Delete)
 			categories.GET("/insight", categoryHandler.GetInsight)
+			categories.GET("/product-counts", categoryHandler.GetWithProductCount)
 			categories.GET("", categoryHandler.Index)
 			categories.GET("/:uuid", categoryHandler.GetByID)
 		}

@@ -35,22 +35,37 @@ func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant, file
 		return err
 	}
 
-	role := domain.Role{
-		Name:      "owner",
-		UUID:      uuid.New(),
-		TenantID:  tenant.ID,
-		CreatedBy: tenant.CreatedBy,
+	defaultRoles := []domain.Role{
+		{
+			Name:      "owner",
+			UUID:      uuid.New(),
+			TenantID:  tenant.ID,
+			CreatedBy: tenant.CreatedBy,
+		},
+		{
+			Name:      "warehouse_manager",
+			UUID:      uuid.New(),
+			TenantID:  tenant.ID,
+			CreatedBy: tenant.CreatedBy,
+		},
+		{
+			Name:      "merchant_keeper",
+			UUID:      uuid.New(),
+			TenantID:  tenant.ID,
+			CreatedBy: tenant.CreatedBy,
+		},
 	}
 
-	err = t.roleUsecase.Create(ctx, &role)
-	if err != nil {
-		return err
+	for i := range defaultRoles {
+		if err := t.roleUsecase.Create(ctx, &defaultRoles[i]); err != nil {
+			return err
+		}
 	}
 
 	userTenant := domain.UserTenant{
 		UserID:    tenant.OwnerId,
 		TenantID:  tenant.ID,
-		RoleID:    role.ID,
+		RoleID:    defaultRoles[0].ID,
 		CreatedBy: tenant.CreatedBy,
 	}
 

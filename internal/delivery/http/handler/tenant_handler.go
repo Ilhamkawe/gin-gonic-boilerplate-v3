@@ -27,7 +27,7 @@ func (t *TenantHandler) Create(c *gin.Context) {
 		return
 	}
 
-	user := c.MustGet("user").(*domain.User)
+	user := c.MustGet("user").(dto.UserProfileResponse)
 
 	if err := t.validator.Validate(tenant); err != nil {
 		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())

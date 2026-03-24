@@ -135,7 +135,9 @@ func (h *CategoryHandler) Index(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	categories, total, err := h.categoryUsecase.Fetch(c, limit, page)
+	offset := (page - 1) * limit
+
+	categories, total, err := h.categoryUsecase.Fetch(c, limit, offset)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to fetch category", err)
 		return
@@ -176,4 +178,15 @@ func (h *CategoryHandler) GetByID(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, "Category fetched successfully", dto.FromCategory(*category))
+}
+
+func (h *CategoryHandler) GetWithProductCount(c *gin.Context) {
+	tenantID := c.MustGet("tenant_id").(int)
+	categories, err := h.categoryUsecase.FetchWithProductCount(c, tenantID)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to fetch categories with product count", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Categories with product count fetched successfully", dto.FromCategoriesWithProductCount(categories))
 }

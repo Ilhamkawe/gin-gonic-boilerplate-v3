@@ -63,10 +63,11 @@ func (u *userUsecase) Create(ctx context.Context, user *domain.User) error {
 	if err != nil {
 		return err
 	}
+	now := time.Now()
 	user.Password = string(hashedPassword)
 	user.UUID = uuid.New()
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = time.Now()
+	user.CreatedAt = now
+	user.UpdatedAt = &now
 
 	return u.userRepo.Create(ctx, user)
 }
@@ -112,7 +113,8 @@ func (u *userUsecase) Update(ctx context.Context, user *domain.User) error {
 		}
 		existingUser.Password = string(hashedPassword)
 	}
-	existingUser.UpdatedAt = time.Now()
+	now := time.Now()
+	existingUser.UpdatedAt = &now
 
 	return u.userRepo.Update(ctx, existingUser)
 }
