@@ -28,8 +28,15 @@ func (r *warehouseRepository) GetByID(ctx context.Context, id uuid.UUID) (*domai
 
 func (r *warehouseRepository) Fetch(ctx context.Context, limit int, offset int) ([]domain.Warehouse, int64, error) {
 	var warehouses []domain.Warehouse
-	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", ctx.Value("tenant_id").(int)).Limit(limit).Offset(offset).Find(&warehouses).Error
-	return warehouses, int64(len(warehouses)), err
+	var total int64
+	tenantID := ctx.Value("tenant_id").(int)
+
+	if err := r.db.Model(&domain.Warehouse{}).Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Limit(limit).Offset(offset).Find(&warehouses).Error
+	return warehouses, total, err
 }
 
 func (r *warehouseRepository) Update(ctx context.Context, warehouse *domain.Warehouse) error {

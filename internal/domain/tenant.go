@@ -9,25 +9,24 @@ import (
 )
 
 type Tenant struct {
-	ID        int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID      uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
-	Name      string    `json:"name" gorm:"not null;type:varchar(255)"`
-	Address   string    `json:"address" gorm:"not null;type:varchar(255)"`
-	Phone     string    `json:"phone" gorm:"not null;type:varchar(15)"`
-	Email     string    `json:"email" gorm:"not null;type:varchar(255)"`
-	Photo     string    `json:"photo" gorm:"not null;type:varchar(255)"`
-	OwnerId   int       `json:"owner_id" gorm:"not null"`
-	Owner     User      `gorm:"foreignKey:OwnerId;references:ID"`
-	Subdomain string    `json:"subdomain" gorm:"not null;type:varchar(255);unique"`
-	CreatedBy string    `json:"created_by" gorm:"type:varchar(255);not null"`
-	UpdatedBy string    `json:"updated_by" gorm:"type:varchar(255)"`
-	DeletedBy string    `json:"deleted_by" gorm:"type:varchar(255)"`
+	ID        int        `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID      uuid.UUID  `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
+	Name      string     `json:"name" gorm:"not null;type:varchar(255)"`
+	Address   string     `json:"address" gorm:"not null;type:varchar(255)"`
+	Phone     string     `json:"phone" gorm:"not null;type:varchar(15)"`
+	Email     string     `json:"email" gorm:"not null;type:varchar(255)"`
+	Photo     string     `json:"photo" gorm:"not null;type:varchar(255)"`
+	OwnerId   int        `json:"owner_id" gorm:"not null"`
+	Owner     User       `gorm:"foreignKey:OwnerId;references:ID"`
+	Subdomain string     `json:"subdomain" gorm:"not null;type:varchar(255);unique"`
+	CreatedBy string     `json:"created_by" gorm:"type:varchar(255);not null"`
+	UpdatedBy string     `json:"updated_by" gorm:"type:varchar(255)"`
+	DeletedBy string     `json:"deleted_by" gorm:"type:varchar(255)"`
 	CreatedAt time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt *time.Time `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
 	LastSync  *time.Time `json:"last_sync"`
 }
-
 
 type TenantRepository interface {
 	Create(ctx context.Context, tenant *Tenant) error
@@ -35,7 +34,9 @@ type TenantRepository interface {
 	Fetch(ctx context.Context, limit int, offset int) ([]Tenant, int64, error)
 	Update(ctx context.Context, tenant *Tenant) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error)
+	IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error)
+	GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (Tenant, error)
+	GetAuthorizedTenants(ctx context.Context, ownerID int) ([]Tenant, error)
 	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
 	GetByUUID(ctx context.Context, uuid uuid.UUID) (*Tenant, error)
 }
@@ -46,7 +47,9 @@ type TenantUseCase interface {
 	Fetch(ctx context.Context, limit int, offset int) ([]Tenant, int64, error)
 	Update(ctx context.Context, tenant *Tenant, file io.Reader, fileSize int64) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error)
+	IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error)
+	GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (Tenant, error)
+	GetAuthorizedTenants(ctx context.Context, ownerID int) ([]Tenant, error)
 	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
 	IsSubdomainExist(ctx context.Context, subdomain string) (bool, error)
 	GetByUUID(ctx context.Context, uuid uuid.UUID) (*Tenant, error)

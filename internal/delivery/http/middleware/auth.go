@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/kawe/warehouse_backend/internal/dto"
 	"github.com/kawe/warehouse_backend/pkg/jwt"
 	"github.com/kawe/warehouse_backend/pkg/response"
+	"gorm.io/gorm"
 )
 
 func TenantAuthorization(tenantUsecase domain.TenantUseCase) gin.HandlerFunc {
@@ -22,23 +24,13 @@ func TenantAuthorization(tenantUsecase domain.TenantUseCase) gin.HandlerFunc {
 			return
 		}
 
-		authorized := false
-		for _, v := range user.Tenants {
-			if v.Tenant.UUID == tenantUUID {
-				authorized = true
-				break
-			}
-		}
-
-		if !authorized {
-			response.Error(c, http.StatusUnauthorized, "User is not authorized to access this tenant", nil)
+		tenant, err := tenantUsecase.GetAuthorizedTenant(c, tenantUUID, user.ID)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Error(c, http.StatusForbidden, "User is not authorized to access this tenant", err.Error())
 			c.Abort()
 			return
-		}
-
-		tenant, err := tenantUsecase.GetByUUID(c, tenantUUID)
-		if err != nil {
-			response.Error(c, http.StatusUnauthorized, "Invalid authorization token", err.Error())
+		} else if err != nil {
+			response.Error(c, http.StatusInternalServerError, "Internal server error", err.Error())
 			c.Abort()
 			return
 		}
@@ -47,23 +39,6 @@ func TenantAuthorization(tenantUsecase domain.TenantUseCase) gin.HandlerFunc {
 		c.Set("tenant_uuid", tenant.UUID)
 
 		c.Next()
-	}
-}
-
-func TenantTokenMatch() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		tenantUUID, _ := uuid.Parse(c.GetHeader("X-Tenant-UUID"))
-
-		// sekarang ada di state tenant apa
-		active_tenant := c.MustGet("claims").(*jwt.AuthCustomClaims).TenantUUID
-		if active_tenant == uuid.Nil || active_tenant != tenantUUID {
-			response.Error(c, http.StatusUnauthorized, "Invalid authorization token", nil)
-			c.Abort()
-			return
-		}
-
-		c.Next()
-
 	}
 }
 

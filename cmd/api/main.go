@@ -17,6 +17,7 @@ import (
 	"github.com/kawe/warehouse_backend/pkg/jwt"
 	"github.com/kawe/warehouse_backend/pkg/logger"
 	"github.com/kawe/warehouse_backend/pkg/minio"
+	"github.com/kawe/warehouse_backend/pkg/mail"
 	"github.com/kawe/warehouse_backend/pkg/validator"
 )
 
@@ -61,9 +62,20 @@ func main() {
 		logger.Fatal(err, "Failed to initialize storage service")
 	}
 
+	// Mail service
+	mailConfig := mail.MailConfig{
+		Host:     cfg.SMTPHost,
+		Port:     cfg.SMTPPort,
+		User:     cfg.SMTPUser,
+		Password: cfg.SMTPPassword,
+		From:     cfg.SMTPFrom,
+	}
+	mailService := mail.NewMailService(mailConfig)
+
 	// User module
 	userRepo := postgres.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepo, timeout, jwtService)
+	userActivationRepo := postgres.NewUserActivationRepository(db)
+	userUsecase := usecase.NewUserUsecase(userRepo, userActivationRepo, mailService, timeout, jwtService)
 	userHandler := handler.NewUserHandler(userUsecase, v)
 
 	// Category module
@@ -89,11 +101,26 @@ func main() {
 	auditLogRepo := postgres.NewAuditLogRepository(db)
 	auditLogUsecase := usecase.NewAuditLogUsecase(auditLogRepo)
 
+	// Warehouse module
+	warehouseRepo := postgres.NewWarehouseRepository(db)
+	warehouseUsecase := usecase.NewWarehouseUseCase(warehouseRepo, storageService)
+	warehouseHandler := handler.NewWarehouseHandler(warehouseUsecase, v)
+
+	// Merchant module
+	merchantRepo := postgres.NewMerchantRepository(db)
+	merchantUsecase := usecase.NewMerchantUseCase(merchantRepo, storageService)
+	merchantHandler := handler.NewMerchantHandler(merchantUsecase, v)
+
+	// Product module
+	productRepo := postgres.NewProductRepository(db)
+	productUsecase := usecase.NewProductUseCase(productRepo, storageService)
+	productHandler := handler.NewProductHandler(productUsecase, v)
+
 	// Authorization handler
 	authorizationHandler := handler.NewAuthorizationHandler(jwtService, userUsecase, v)
 
 	// Router
-	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantUsecase, tenantHandler, auditLogUsecase, authorizationHandler)
+	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantUsecase, tenantHandler, auditLogUsecase, authorizationHandler, warehouseHandler, merchantHandler, productHandler)
 
 	// Server
 	if cfg.AppPort == "" {

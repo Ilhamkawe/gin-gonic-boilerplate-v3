@@ -31,7 +31,7 @@ func (t *tenantRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.T
 func (t *tenantRepository) Fetch(ctx context.Context, limit int, offset int) ([]domain.Tenant, int64, error) {
 	var tenants []domain.Tenant
 	var count int64
-	if err := t.db.Count(&count).Error; err != nil {
+	if err := t.db.Model(&domain.Tenant{}).Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 	if err := t.db.Limit(limit).Offset(offset).Find(&tenants).Error; err != nil {
@@ -41,19 +41,35 @@ func (t *tenantRepository) Fetch(ctx context.Context, limit int, offset int) ([]
 }
 
 func (t *tenantRepository) Update(ctx context.Context, tenant *domain.Tenant) error {
-	return t.db.Save(tenant).Error
+	return t.db.Model(&domain.Tenant{}).Where("uuid = ?", tenant.UUID).Updates(tenant).Error
 }
 
 func (t *tenantRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return t.db.Delete(&domain.Tenant{}, "uuid = ?", id).Error
 }
 
-func (t *tenantRepository) IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error) {
+func (t *tenantRepository) IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error) {
 	var tenant domain.Tenant
-	if err := t.db.Where("uuid = ? AND tenant_id = ?", id, tenantID).First(&tenant).Error; err != nil {
+	if err := t.db.Where("uuid = ? AND owner_id = ?", id, ownerID).First(&tenant).Error; err != nil {
 		return false, err
 	}
 	return true, nil
+}
+
+func (t *tenantRepository) GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (domain.Tenant, error) {
+	var tenant domain.Tenant
+	if err := t.db.Where("uuid = ? AND owner_id = ?", tenantID, ownerID).First(&tenant).Error; err != nil {
+		return tenant, err
+	}
+	return tenant, nil
+}
+
+func (t *tenantRepository) GetAuthorizedTenants(ctx context.Context, ownerID int) ([]domain.Tenant, error) {
+	var tenants []domain.Tenant
+	if err := t.db.Where("owner_id = ?", ownerID).Find(&tenants).Error; err != nil {
+		return nil, err
+	}
+	return tenants, nil
 }
 
 func (t *tenantRepository) GetBySubdomain(ctx context.Context, subdomain string) (*domain.Tenant, error) {

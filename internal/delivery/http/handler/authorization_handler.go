@@ -45,6 +45,39 @@ func (h *AuthorizationHandler) AuthorizationToTenant(c *gin.Context) {
 
 }
 
+func (h *AuthorizationHandler) Register(c *gin.Context) {
+	var req dto.RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	if err := h.validator.Validate(req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
+		return
+	}
+
+	user, err := h.userUsecase.Register(c.Request.Context(), req.Email, req.Password, req.Name, req.Phone)
+	if err != nil {
+		if err == domain.ErrConflict {
+			response.Error(c, http.StatusConflict, "User with this email already exists", nil)
+			return
+		}
+		response.Error(c, http.StatusInternalServerError, "Failed to register", err.Error())
+		return
+	}
+
+	token, err := h.userUsecase.GenerateToken(c.Request.Context(), user.UUID, uuid.Nil)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to generate token", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "User registered successfully", dto.LoginResponse{
+		User:  dto.FromUser(*user),
+		Token: token,
+	})
+}
 
 func (h *AuthorizationHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
@@ -83,4 +116,3 @@ func (h *AuthorizationHandler) Login(c *gin.Context) {
 		Token: token,
 	})
 }
-

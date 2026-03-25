@@ -60,7 +60,6 @@ type UpdateTenantDTO struct {
 	Address   string    `json:"address" form:"address" validate:"required"`
 	Phone     string    `json:"phone" form:"phone" validate:"required"`
 	Email     string    `json:"email" form:"email" validate:"required,email"`
-	Photo     string    `json:"photo" form:"photo" validate:"required"`
 	Subdomain string    `json:"subdomain" form:"subdomain" validate:"required"`
 }
 

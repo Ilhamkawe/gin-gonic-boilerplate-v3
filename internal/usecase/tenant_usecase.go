@@ -103,8 +103,16 @@ func (t *tentantUseCase) Delete(ctx context.Context, id uuid.UUID) error {
 	return t.tenantRepo.Delete(ctx, id)
 }
 
-func (t *tentantUseCase) IsAuthroized(ctx context.Context, id uuid.UUID, tenantID int) (bool, error) {
-	return t.tenantRepo.IsAuthroized(ctx, id, tenantID)
+func (t *tentantUseCase) IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error) {
+	return t.tenantRepo.IsAuthorized(ctx, id, ownerID)
+}
+
+func (t *tentantUseCase) GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (domain.Tenant, error) {
+	return t.tenantRepo.GetAuthorizedTenant(ctx, tenantID, ownerID)
+}
+
+func (t *tentantUseCase) GetAuthorizedTenants(ctx context.Context, ownerID int) ([]domain.Tenant, error) {
+	return t.tenantRepo.GetAuthorizedTenants(ctx, ownerID)
 }
 
 func (t *tentantUseCase) GetBySubdomain(ctx context.Context, subdomain string) (*domain.Tenant, error) {

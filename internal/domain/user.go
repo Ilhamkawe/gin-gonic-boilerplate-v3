@@ -19,12 +19,12 @@ type User struct {
 	CreatedBy  string       `json:"created_by" gorm:"not null;type:varchar(255)"`
 	UpdatedBy  string       `json:"updated_by" gorm:"type:varchar(255)"`
 	DeletedBy  string       `json:"deleted_by" gorm:"type:varchar(255)"`
-	CreatedAt  time.Time     `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt  *time.Time    `json:"updated_at"`
-	DeletedAt  *time.Time    `json:"deleted_at"`
-	LastSync   *time.Time    `json:"last_sync"`
+	IsActive   bool         `json:"is_active" gorm:"not null;type:boolean;default:true"`
+	CreatedAt  time.Time    `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt  *time.Time   `json:"updated_at"`
+	DeletedAt  *time.Time   `json:"deleted_at"`
+	LastSync   *time.Time   `json:"last_sync"`
 }
-
 
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
@@ -44,6 +44,8 @@ type UserUsecase interface {
 	Fetch(ctx context.Context, page int, limit int) ([]User, int64, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	Register(ctx context.Context, email string, password string, name string, phone string) (*User, error)
+	ActivateUser(ctx context.Context, token string) error
 	GenerateToken(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (string, error)
 	GetByUUID(ctx context.Context, uuid uuid.UUID) (*User, error)
 }

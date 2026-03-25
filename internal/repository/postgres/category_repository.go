@@ -26,8 +26,15 @@ func (r *categoryRepository) GetByID(ctx context.Context, category *domain.Categ
 
 func (r *categoryRepository) Fetch(ctx context.Context, limit int, offset int) ([]domain.Category, int64, error) {
 	var categories []domain.Category
-	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", ctx.Value("tenant_id").(int)).Limit(limit).Offset(offset).Find(&categories).Error
-	return categories, int64(len(categories)), err
+	var total int64
+	tenantID := ctx.Value("tenant_id").(int)
+
+	if err := r.db.Model(&domain.Category{}).Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Limit(limit).Offset(offset).Find(&categories).Error
+	return categories, total, err
 }
 
 func (r *categoryRepository) Update(ctx context.Context, category *domain.Category) error {

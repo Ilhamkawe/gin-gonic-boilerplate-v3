@@ -20,6 +20,11 @@ type Config struct {
 	MinioBucketName string `mapstructure:"MINIO_BUCKET_NAME"`
 	MinioUseSSL     bool   `mapstructure:"MINIO_USE_SSL"`
 	AppDevMode      bool   `mapstructure:"APP_DEV_MODE"`
+	SMTPHost        string `mapstructure:"SMTP_HOST"`
+	SMTPPort        int    `mapstructure:"SMTP_PORT"`
+	SMTPUser        string `mapstructure:"SMTP_USER"`
+	SMTPPassword    string `mapstructure:"SMTP_PASSWORD"`
+	SMTPFrom        string `mapstructure:"SMTP_FROM"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

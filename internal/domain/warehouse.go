@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,8 +16,6 @@ type Warehouse struct {
 	Phone     string    `json:"phone" gorm:"not null;type:varchar(15)"`
 	Email     string    `json:"email" gorm:"not null;type:varchar(255)"`
 	Photo     string    `json:"photo" gorm:"not null;type:varchar(255)"`
-	ManagerId int       `json:"manager_id" gorm:"not null"`
-	Manager   User      `gorm:"foreignKey:ManagerId;references:ID"`
 	TenantID  int       `json:"tenant_id" gorm:"not null"`
 	Tenant    Tenant    `gorm:"foreignKey:TenantID;references:ID"`
 	CreatedBy string    `json:"created_by" gorm:"type:varchar(255);not null"`
@@ -37,9 +36,9 @@ type WarehouseRepository interface {
 }
 
 type WarehouseUseCase interface {
-	Create(ctx context.Context, warehouse *Warehouse) error
+	Create(ctx context.Context, warehouse *Warehouse, file io.Reader, fileSize int64) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Warehouse, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Warehouse, int64, error)
-	Update(ctx context.Context, warehouse *Warehouse) error
+	Update(ctx context.Context, warehouse *Warehouse, file io.Reader, fileSize int64) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }

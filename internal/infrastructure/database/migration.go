@@ -67,6 +67,9 @@ func Migrate(db *gorm.DB) error {
 
 		// audit log
 		&domain.AuditLog{},
+
+		// user activations
+		&domain.UserActivation{},
 	)
 
 	if err != nil {

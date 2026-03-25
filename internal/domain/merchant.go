@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -40,9 +41,9 @@ type MerchantRepository interface {
 }
 
 type MerchantUseCase interface {
-	Create(ctx context.Context, merchant *Merchant) error
+	Create(ctx context.Context, merchant *Merchant, file io.Reader, fileSize int64) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Merchant, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Merchant, int64, error)
-	Update(ctx context.Context, merchant *Merchant) error
+	Update(ctx context.Context, merchant *Merchant, file io.Reader, fileSize int64) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
