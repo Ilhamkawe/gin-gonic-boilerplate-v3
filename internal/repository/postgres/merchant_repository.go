@@ -31,11 +31,11 @@ func (r *merchantRepository) Fetch(ctx context.Context, limit int, offset int) (
 	var count int64
 	tenantID := ctx.Value("tenant_id").(int)
 
-	if err := r.db.Model(&domain.Merchant{}).Where("tenant_id = ? AND deleted_at = '0001-01-01'", tenantID).Count(&count).Error; err != nil {
+	if err := r.db.Model(&domain.Merchant{}).Where("tenant_id = ?", tenantID).Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := r.db.Where("tenant_id = ? AND deleted_at = '0001-01-01'", tenantID).Limit(limit).Offset(offset).Find(&merchants).Error
+	err := r.db.Where("tenant_id = ?", tenantID).Limit(limit).Offset(offset).Find(&merchants).Error
 	return merchants, count, err
 }
 

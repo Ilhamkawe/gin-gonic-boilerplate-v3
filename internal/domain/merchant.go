@@ -6,30 +6,31 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Merchant struct {
-	ID           int       `json:"id" gorm:"primaryKey;autoIncrement;unique"`
-	UUID         uuid.UUID `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
-	Name         string    `json:"name" gorm:"not null;type:varchar(255)"`
-	Address      string    `json:"address" gorm:"not null"`
-	Phone        string    `json:"phone" gorm:"not null;type:varchar(15)"`
-	Email        string    `json:"email" gorm:"not null;type:varchar(255)"`
-	Photo        string    `json:"photo" gorm:"not null;type:varchar(255)"`
-	KeeperId     int       `json:"keeper_id" gorm:"not null"`
-	Keeper       User      `gorm:"foreignKey:KeeperId;references:ID"`
-	HasWarehouse bool      `json:"has_warehouse" gorm:"not null"`
-	WarehouseId  int       `json:"warehouse_id" gorm:"not null"`
-	Warehouse    Warehouse `gorm:"foreignKey:WarehouseId;references:ID"`
-	TenantID     int       `json:"tenant_id" gorm:"not null"`
-	Tenant       Tenant    `gorm:"foreignKey:TenantID;references:ID"`
-	CreatedBy    string    `json:"created_by" gorm:"type:varchar(255);not null"`
-	UpdatedBy    string    `json:"updated_by" gorm:"type:varchar(255)"`
-	DeletedBy    string    `json:"deleted_by" gorm:"type:varchar(255)"`
-	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	DeletedAt    time.Time `json:"deleted_at"`
-	LastSync     time.Time `json:"last_sync"`
+	ID           int            `json:"id" gorm:"primaryKey;autoIncrement;unique"`
+	UUID         uuid.UUID      `json:"uuid" gorm:"type:uuid;not null;unique;default:gen_random_uuid()"`
+	Name         string         `json:"name" gorm:"not null;type:varchar(255)"`
+	Address      string         `json:"address" gorm:"not null"`
+	Phone        string         `json:"phone" gorm:"not null;type:varchar(15)"`
+	Email        string         `json:"email" gorm:"not null;type:varchar(255)"`
+	Photo        string         `json:"photo" gorm:"not null;type:varchar(255)"`
+	KeeperId     int            `json:"keeper_id" gorm:"not null"`
+	Keeper       User           `gorm:"foreignKey:KeeperId;references:ID"`
+	HasWarehouse bool           `json:"has_warehouse" gorm:"not null;default:false"`
+	WarehouseId  int            `json:"warehouse_id" gorm:"default:null"`
+	Warehouse    Warehouse      `gorm:"foreignKey:WarehouseId;references:ID"`
+	TenantID     int            `json:"tenant_id" gorm:"not null"`
+	Tenant       Tenant         `gorm:"foreignKey:TenantID;references:ID"`
+	CreatedBy    string         `json:"created_by" gorm:"type:varchar(255);not null"`
+	UpdatedBy    string         `json:"updated_by" gorm:"type:varchar(255)"`
+	DeletedBy    string         `json:"deleted_by" gorm:"type:varchar(255)"`
+	CreatedAt    time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt    *time.Time     `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	LastSync     *time.Time     `json:"last_sync"`
 }
 
 type MerchantRepository interface {

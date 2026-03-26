@@ -29,11 +29,11 @@ func (r *categoryRepository) Fetch(ctx context.Context, limit int, offset int) (
 	var total int64
 	tenantID := ctx.Value("tenant_id").(int)
 
-	if err := r.db.Model(&domain.Category{}).Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Count(&total).Error; err != nil {
+	if err := r.db.Model(&domain.Category{}).Where("tenant_id = ?", tenantID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Limit(limit).Offset(offset).Find(&categories).Error
+	err := r.db.Where("tenant_id = ?").Limit(limit).Offset(offset).Find(&categories).Error
 	return categories, total, err
 }
 
@@ -58,7 +58,7 @@ func (r *categoryRepository) FetchWithProductCount(ctx context.Context, tenantID
 	err := r.db.Table("categories").
 		Select("categories.*, COUNT(products.category_id) as product_count").
 		Joins("LEFT JOIN products ON products.category_id = categories.id").
-		Where("categories.tenant_id = ? AND categories.deleted_at IS NULL", tenantID).
+		Where("categories.tenant_id = ?", tenantID).
 		Group("categories.id").
 		Scan(&results).Error
 	return results, err

@@ -84,12 +84,9 @@ func NewRouter(userHandler *handler.UserHandler,
 		tanants.Use(
 			middleware.AuthMiddleware(jwtService, userUsecase))
 		{
-			tanants.Use(middleware.TenantAuthorization(tenantUsecase))
-			{
-				tanants.PUT("/:uuid", tenantHandler.Update)
-			}
 
-			tanants.Use(middleware.AutoMutationAudit(auditLogUsecase))
+			auditGroup := tanants.Group("")
+			auditGroup.Use(middleware.AutoMutationAudit(auditLogUsecase))
 			{
 				tanants.POST("", tenantHandler.Create)
 				tanants.GET("", tenantHandler.Fetch)
@@ -97,6 +94,13 @@ func NewRouter(userHandler *handler.UserHandler,
 
 				tanants.DELETE("/:uuid", tenantHandler.Delete)
 			}
+
+			authTenantGoup := tanants.Group("")
+			authTenantGoup.Use(middleware.TenantAuthorization(tenantUsecase))
+			{
+				authTenantGoup.PUT("/:uuid", tenantHandler.Update)
+			}
+
 		}
 
 		warehouses := v1.Group("/warehouses")

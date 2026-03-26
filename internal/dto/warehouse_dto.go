@@ -8,15 +8,15 @@ import (
 )
 
 type WarehouseResponse struct {
-	ID        int        `json:"id"`
-	UUID      uuid.UUID  `json:"uuid"`
-	Name      string     `json:"name"`
-	Address   string     `json:"address"`
-	Phone     string     `json:"phone"`
-	Email     string     `json:"email"`
-	Photo     string     `json:"photo"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	ID        int       `json:"id"`
+	UUID      uuid.UUID `json:"uuid"`
+	Name      string    `json:"name"`
+	Address   string    `json:"address"`
+	Phone     string    `json:"phone"`
+	Email     string    `json:"email"`
+	Photo     string    `json:"photo"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type CreateWarehouseDTO struct {
@@ -44,7 +44,6 @@ func FromWarehouse(warehouse domain.Warehouse) WarehouseResponse {
 		Email:     warehouse.Email,
 		Photo:     warehouse.Photo,
 		CreatedAt: warehouse.CreatedAt,
-		UpdatedAt: warehouse.UpdatedAt,
 	}
 }
 

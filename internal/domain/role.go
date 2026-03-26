@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Role struct {
@@ -17,10 +18,10 @@ type Role struct {
 	CreatedBy       string           `json:"created_by" gorm:"type:varchar(255);not null"`
 	UpdatedBy       string           `json:"updated_by" gorm:"type:varchar(255)"`
 	DeletedBy       string           `json:"deleted_by" gorm:"type:varchar(255)"`
-	CreatedAt       time.Time        `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt       time.Time        `json:"updated_at"`
-	DeletedAt       time.Time        `json:"deleted_at"`
-	LastSync        time.Time        `json:"last_sync"`
+	CreatedAt       time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	LastSync        time.Time      `json:"last_sync"`
 }
 
 type RoleRepository interface {

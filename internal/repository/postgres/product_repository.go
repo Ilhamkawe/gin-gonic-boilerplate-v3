@@ -31,11 +31,11 @@ func (r *productRepository) Fetch(ctx context.Context, limit int, offset int) ([
 	var count int64
 	tenantID := ctx.Value("tenant_id").(int)
 
-	if err := r.db.Model(&domain.Product{}).Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Count(&count).Error; err != nil {
+	if err := r.db.Model(&domain.Product{}).Where("tenant_id = ?", tenantID).Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Limit(limit).Offset(offset).Find(&products).Error
+	err := r.db.Where("tenant_id = ?", tenantID).Limit(limit).Offset(offset).Find(&products).Error
 	return products, count, err
 }
 

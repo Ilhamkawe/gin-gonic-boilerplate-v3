@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/bytedance/gopkg/util/logger"
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
 	"gorm.io/gorm"
@@ -31,11 +33,13 @@ func (r *warehouseRepository) Fetch(ctx context.Context, limit int, offset int) 
 	var total int64
 	tenantID := ctx.Value("tenant_id").(int)
 
-	if err := r.db.Model(&domain.Warehouse{}).Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Count(&total).Error; err != nil {
+	logger.Debug(fmt.Sprintf("offset: %d", offset))
+
+	if err := r.db.Model(&domain.Warehouse{}).Where("tenant_id = ?", tenantID).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := r.db.Where("tenant_id = ? AND deleted_at IS NULL", tenantID).Limit(limit).Offset(offset).Find(&warehouses).Error
+	err := r.db.Where("tenant_id = ?", tenantID).Limit(limit).Offset(offset).Find(&warehouses).Error
 	return warehouses, total, err
 }
 

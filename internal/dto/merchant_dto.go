@@ -54,7 +54,6 @@ func FromMerchant(merchant domain.Merchant) MerchantResponse {
 		HasWarehouse: merchant.HasWarehouse,
 		WarehouseId:  merchant.WarehouseId,
 		CreatedAt:    merchant.CreatedAt,
-		UpdatedAt:    merchant.UpdatedAt,
 	}
 }
 

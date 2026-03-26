@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type Category struct {
@@ -24,7 +25,7 @@ type Category struct {
 	DeletedBy string         `json:"deleted_by" gorm:"type:varchar(255)"`
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt *time.Time     `json:"updated_at"`
-	DeletedAt *time.Time     `json:"deleted_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	LastSync  *time.Time     `json:"last_sync"`
 }
 

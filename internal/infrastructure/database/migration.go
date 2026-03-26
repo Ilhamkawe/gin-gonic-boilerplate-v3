@@ -1,6 +1,10 @@
 package database
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/kawe/warehouse_backend/internal/domain"
 	"github.com/kawe/warehouse_backend/pkg/logger"
 	"gorm.io/gorm"
@@ -77,6 +81,50 @@ func Migrate(db *gorm.DB) error {
 		return err
 	}
 
+	// Migrate functions and triggers
+	if err := migrateFunctionsAndTriggers(db); err != nil {
+		return err
+	}
+
 	logger.Info("Migration completed successfully")
+	return nil
+}
+
+// migrateFunctionsAndTriggers is used to execute raw SQL for functions and triggers
+// since GORM's AutoMigrate does not support them natively.
+func migrateFunctionsAndTriggers(db *gorm.DB) error {
+	logger.Info("Running functions and triggers migration from SQL files...")
+
+	migrationsDir := "migrations"
+	files, err := os.ReadDir(migrationsDir)
+	if err != nil {
+		logger.Info("No migrations directory found or failed to read: %v", err)
+		return nil // Abaikan jika folder migrations tidak ada (tidak fatal)
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		fileName := file.Name()
+		// Hanya eksekusi file berakhiran ".up.sql" dengan ketat, abaikan file lainnya
+		if strings.HasSuffix(fileName, ".up.sql") {
+			filePath := filepath.Join(migrationsDir, fileName)
+			content, err := os.ReadFile(filePath)
+			if err != nil {
+				logger.Error(err, "Failed to read migration file: "+fileName)
+				return err
+			}
+
+			logger.Info("Executing SQL migration file: %s", fileName)
+			if err := db.Exec(string(content)).Error; err != nil {
+				logger.Error(err, "Failed to execute SQL migration from file: "+fileName)
+				return err
+			}
+		}
+	}
+
+	logger.Info("Functions and triggers migration completed successfully")
 	return nil
 }
