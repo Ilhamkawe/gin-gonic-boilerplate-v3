@@ -11,6 +11,14 @@ type RoleResponse struct {
 	Name string    `json:"name"`
 }
 
+type CreateRoleDTO struct {
+	Name string `json:"name" validate:"required"`
+}
+
+type UpdateRoleDTO struct {
+	Name string `json:"name" validate:"required"`
+}
+
 func FromRole(role domain.Role) RoleResponse {
 	return RoleResponse{
 		ID:   role.ID,
@@ -20,7 +28,7 @@ func FromRole(role domain.Role) RoleResponse {
 }
 
 func FromRoles(roles []domain.Role) []RoleResponse {
-	var responses []RoleResponse
+	responses := make([]RoleResponse, 0)
 	for _, role := range roles {
 		responses = append(responses, FromRole(role))
 	}

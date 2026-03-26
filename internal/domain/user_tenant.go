@@ -42,4 +42,5 @@ type UserTenantUseCase interface {
 	Delete(ctx context.Context, id int) error
 	GetByID(ctx context.Context, id int) (*UserTenant, error)
 	GetAll(ctx context.Context) ([]UserTenant, error)
+	Fetch(ctx context.Context, limit int, offset int) ([]UserTenant, int64, error)
 }

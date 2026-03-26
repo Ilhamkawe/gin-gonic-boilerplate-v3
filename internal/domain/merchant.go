@@ -17,7 +17,7 @@ type Merchant struct {
 	Phone        string         `json:"phone" gorm:"not null;type:varchar(15)"`
 	Email        string         `json:"email" gorm:"not null;type:varchar(255)"`
 	Photo        string         `json:"photo" gorm:"not null;type:varchar(255)"`
-	KeeperId     int            `json:"keeper_id" gorm:"not null"`
+	KeeperId     int            `json:"keeper_id" gorm:"default:null"`
 	Keeper       User           `gorm:"foreignKey:KeeperId;references:ID"`
 	HasWarehouse bool           `json:"has_warehouse" gorm:"not null;default:false"`
 	WarehouseId  int            `json:"warehouse_id" gorm:"default:null"`

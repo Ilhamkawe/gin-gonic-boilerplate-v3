@@ -90,7 +90,25 @@ func main() {
 	// Role module
 	roleRepo := postgres.NewRoleRepo(db)
 	roleUsecase := usecase.NewRoleUsecase(roleRepo)
-	// roleHandler := handler.NewRoleHandler(roleUsecase, v)
+	roleHandler := handler.NewRoleHandler(roleUsecase, v)
+
+	// Permission module
+	permissionRepo := postgres.NewPermissionRepository(db)
+	permissionUsecase := usecase.NewPermissionUseCase(permissionRepo)
+	permissionHandler := handler.NewPermissionHandler(permissionUsecase, v)
+
+	// Role Permission module
+	rpRepo := postgres.NewRolePermissionRepository(db)
+	rpUsecase := usecase.NewRolePermissionUseCase(rpRepo)
+	rpHandler := handler.NewRolePermissionHandler(rpUsecase, v)
+
+	// User Access module
+	uaRepo := postgres.NewUserAccessRepository(db)
+	uaUsecase := usecase.NewUserAccessUseCase(uaRepo)
+	uaHandler := handler.NewUserAccessHandler(uaUsecase, v)
+
+	// User Tenant Handler
+	userTenantHandler := handler.NewUserTenantHandler(userTenantUsecase, v)
 
 	// Tenant module
 	tenantRepo := postgres.NewTenantRepository(db)
@@ -120,7 +138,7 @@ func main() {
 	authorizationHandler := handler.NewAuthorizationHandler(jwtService, userUsecase, v)
 
 	// Router
-	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantUsecase, tenantHandler, auditLogUsecase, authorizationHandler, warehouseHandler, merchantHandler, productHandler)
+	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantUsecase, tenantHandler, auditLogUsecase, authorizationHandler, warehouseHandler, merchantHandler, productHandler, roleHandler, permissionHandler, rpHandler, uaHandler, userTenantHandler)
 
 	// Server
 	if cfg.AppPort == "" {

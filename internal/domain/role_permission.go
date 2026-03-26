@@ -35,7 +35,7 @@ type RolePermissionRepository interface {
 	BulkInsert(ctx context.Context, rolePermissions []RolePermission) error
 }
 
-type RolePermissionUseCasee interface {
+type RolePermissionUseCase interface {
 	Create(ctx context.Context, rolePermission *RolePermission) error
 	GetByID(ctx context.Context, id uuid.UUID) (*RolePermission, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]RolePermission, int64, error)

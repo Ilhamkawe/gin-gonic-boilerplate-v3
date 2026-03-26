@@ -22,6 +22,11 @@ func NewRouter(userHandler *handler.UserHandler,
 	warehouseHandler *handler.WarehouseHandler,
 	merchantHandler *handler.MerchantHandler,
 	productHandler *handler.ProductHandler,
+	roleHandler *handler.RoleHandler,
+	permissionHandler *handler.PermissionHandler,
+	rolePermissionHandler *handler.RolePermissionHandler,
+	userAccessHandler *handler.UserAccessHandler,
+	userTenantHandler *handler.UserTenantHandler,
 ) *gin.Engine {
 	router := gin.New()
 
@@ -140,6 +145,63 @@ func NewRouter(userHandler *handler.UserHandler,
 			products.GET("/:uuid", productHandler.GetByID)
 			products.PUT("/:uuid", productHandler.Update)
 			products.DELETE("/:uuid", productHandler.Delete)
+		}
+
+		roles := v1.Group("/roles")
+		roles.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.TenantAuthorization(tenantUsecase),
+			middleware.AutoMutationAudit(auditLogUsecase))
+		{
+			roles.POST("", roleHandler.Create)
+			roles.GET("", roleHandler.Index)
+			roles.GET("/:uuid", roleHandler.GetByID)
+			roles.PUT("/:uuid", roleHandler.Update)
+			roles.DELETE("/:uuid", roleHandler.Delete)
+		}
+
+		permissions := v1.Group("/permissions")
+		permissions.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.AutoMutationAudit(auditLogUsecase))
+		{
+			permissions.POST("", permissionHandler.Create)
+			permissions.GET("", permissionHandler.Index)
+			permissions.GET("/:uuid", permissionHandler.GetByID)
+			permissions.PUT("/:uuid", permissionHandler.Update)
+			permissions.DELETE("/:uuid", permissionHandler.Delete)
+		}
+
+		rolePermissions := v1.Group("/role-permissions")
+		rolePermissions.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.TenantAuthorization(tenantUsecase),
+			middleware.AutoMutationAudit(auditLogUsecase))
+		{
+			rolePermissions.POST("/bulk", rolePermissionHandler.BulkAssign)
+			rolePermissions.GET("", rolePermissionHandler.Index)
+			rolePermissions.DELETE("/:uuid", rolePermissionHandler.Delete)
+		}
+
+		userAccesses := v1.Group("/user-accesses")
+		userAccesses.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.TenantAuthorization(tenantUsecase),
+			middleware.AutoMutationAudit(auditLogUsecase))
+		{
+			userAccesses.POST("", userAccessHandler.Create)
+			userAccesses.GET("", userAccessHandler.Index)
+			userAccesses.DELETE("/:uuid", userAccessHandler.Delete)
+		}
+
+		userTenants := v1.Group("/user-tenants")
+		userTenants.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.AutoMutationAudit(auditLogUsecase))
+		{
+			userTenants.POST("", userTenantHandler.Create)
+			userTenants.GET("", userTenantHandler.Index)
+			userTenants.DELETE("/:id", userTenantHandler.Delete)
 		}
 
 	}
