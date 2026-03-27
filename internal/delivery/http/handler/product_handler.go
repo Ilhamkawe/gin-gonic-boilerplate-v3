@@ -23,7 +23,7 @@ func NewProductHandler(productUseCase domain.ProductUseCase, validator *validato
 
 func (h *ProductHandler) Create(c *gin.Context) {
 	var req dto.CreateProductDTO
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
@@ -33,27 +33,35 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		return
 	}
 
-	file, header, err := c.Request.FormFile("thumbnail")
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Thumbnail is required", err.Error())
-		return
-	}
-
 	userUUID := c.MustGet("user_uuid").(uuid.UUID).String()
 	tenantID := c.MustGet("tenant_id").(int)
 
 	productDomain := domain.Product{
-		Name:          req.Name,
-		Description:   req.Description,
-		Price:         req.Price,
-		CategoryID:    req.CategoryID,
-		IsPopular:     req.IsPopular,
-		AttributeJson: req.AttributeJson,
-		TenantID:      tenantID,
-		CreatedBy:     userUUID,
+		Name:        req.Name,
+		Description: req.Description,
+		CategoryID:  req.CategoryID,
+		IsPopular:   req.IsPopular,
+		Thumbnail:   req.Thumbnail,
+		TenantID:    tenantID,
+		CreatedBy:   userUUID,
 	}
 
-	if err := h.productUseCase.Create(c, &productDomain, file, header.Size); err != nil {
+	if len(req.Variants) > 0 {
+		var variants []domain.ProductVariant
+		for _, v := range req.Variants {
+			variants = append(variants, domain.ProductVariant{
+				SKU:           v.SKU,
+				AttributeJson: v.AttributeJson,
+				Price:         v.Price,
+				Barcode:       v.Barcode,
+				TenantID:      tenantID,
+				CreatedBy:     userUUID,
+			})
+		}
+		productDomain.Variants = variants
+	}
+
+	if err := h.productUseCase.Create(c, &productDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create product", err.Error())
 		return
 	}
@@ -108,38 +116,26 @@ func (h *ProductHandler) Update(c *gin.Context) {
 	}
 
 	var req dto.UpdateProductDTO
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
-	}
-
-	if err := h.validator.Validate(req); err != nil {
-		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
-		return
-	}
-
-	file, header, _ := c.Request.FormFile("thumbnail")
-	var fileSize int64
-	if header != nil {
-		fileSize = header.Size
 	}
 
 	userUUID := c.MustGet("user_uuid").(uuid.UUID).String()
 	tenantID := c.MustGet("tenant_id").(int)
 
 	productDomain := domain.Product{
-		UUID:          uuid.Must(uuid.Parse(id)),
-		Name:          req.Name,
-		Description:   req.Description,
-		Price:         req.Price,
-		CategoryID:    req.CategoryID,
-		IsPopular:     req.IsPopular,
-		AttributeJson: req.AttributeJson,
-		TenantID:      tenantID,
-		UpdatedBy:     userUUID,
+		UUID:        uuid.Must(uuid.Parse(id)),
+		Name:        req.Name,
+		Description: req.Description,
+		CategoryID:  req.CategoryID,
+		IsPopular:   req.IsPopular,
+		Thumbnail:   req.Thumbnail,
+		TenantID:    tenantID,
+		UpdatedBy:   userUUID,
 	}
 
-	if err := h.productUseCase.Update(c, &productDomain, file, fileSize); err != nil {
+	if err := h.productUseCase.Update(c, &productDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update product", err.Error())
 		return
 	}

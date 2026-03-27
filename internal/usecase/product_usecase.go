@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"io"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
@@ -17,16 +17,31 @@ func NewProductUseCase(productRepo domain.ProductRepository, storageService doma
 	return &productUseCase{productRepo: productRepo, storageService: storageService}
 }
 
-func (u *productUseCase) Create(ctx context.Context, product *domain.Product, file io.Reader, fileSize int64) error {
+func (u *productUseCase) Create(ctx context.Context, product *domain.Product) error {
 	UUID := uuid.New()
-	fileName := UUID.String() + "/products/" + UUID.String() + ".jpg"
-	imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-	if err != nil {
-		return err
-	}
-
 	product.UUID = UUID
-	product.Thumbnail = imageUrl
+
+	if product.Thumbnail != "" {
+		parts := strings.Split(product.Thumbnail, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
+		}
+
+		if sourcePath != "" {
+			destPath := UUID.String() + "/products/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			product.Thumbnail = strings.Replace(product.Thumbnail, sourcePath, destPath, 1)
+		}
+	}
 
 	return u.productRepo.Create(ctx, product)
 }
@@ -39,15 +54,27 @@ func (u *productUseCase) Fetch(ctx context.Context, limit int, offset int) ([]do
 	return u.productRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *productUseCase) Update(ctx context.Context, product *domain.Product, file io.Reader, fileSize int64) error {
-	if file != nil {
-		UUID := uuid.New()
-		fileName := UUID.String() + "/products/" + UUID.String() + ".jpg"
-		imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-		if err != nil {
-			return err
+func (u *productUseCase) Update(ctx context.Context, product *domain.Product) error {
+	if product.Thumbnail != "" && strings.Contains(product.Thumbnail, "/temp/") {
+		parts := strings.Split(product.Thumbnail, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
 		}
-		product.Thumbnail = imageUrl
+
+		if sourcePath != "" {
+			destPath := product.UUID.String() + "/products/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			product.Thumbnail = strings.Replace(product.Thumbnail, sourcePath, destPath, 1)
+		}
 	}
 
 	return u.productRepo.Update(ctx, product)

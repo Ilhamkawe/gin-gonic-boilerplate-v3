@@ -10,7 +10,6 @@ import (
 	"github.com/kawe/warehouse_backend/internal/dto"
 	"github.com/kawe/warehouse_backend/pkg/response"
 	"github.com/kawe/warehouse_backend/pkg/validator"
-	"gorm.io/datatypes"
 )
 
 type CategoryHandler struct {
@@ -39,94 +38,72 @@ func (h *CategoryHandler) Delete(c *gin.Context) {
 }
 
 func (h *CategoryHandler) Create(c *gin.Context) {
-	var category dto.CreateCategory
-
-	category.TenantID = c.MustGet("tenant_id").(int)
-	category.Name = c.PostForm("name")
-	category.Tagline = c.PostForm("tagline")
-	formJsonStr := c.PostForm("form_json")
-	if formJsonStr != "" {
-		category.FormJson = datatypes.JSON([]byte(formJsonStr))
-	}
-
-	// Lakukan validasi nama & tagline (karena c.PostForm tidak otomatis memicu validasi struct default)
-	if category.Name == "" {
-		response.Error(c, http.StatusBadRequest, "Name is required", nil)
+	var req dto.CreateCategory
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
 
-	file, header, err := c.Request.FormFile("icon")
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid request body", err)
+	if err := h.validator.Validate(req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
 		return
 	}
 
-	user_uuid := c.MustGet("user_uuid").(uuid.UUID).String()
+	tenantID := c.MustGet("tenant_id").(int)
+	userUUID := c.MustGet("user_uuid").(uuid.UUID).String()
 
 	categoryDomain := domain.Category{
-		Name:      category.Name,
-		Tagline:   category.Tagline,
-		FormJson:  category.FormJson,
-		TenantID:  category.TenantID,
-		CreatedBy: user_uuid,
+		Name:      req.Name,
+		Tagline:   req.Tagline,
+		FormJson:  req.FormJson,
+		Icon:      req.Icon,
+		TenantID:  tenantID,
+		CreatedBy: userUUID,
 	}
 
-	if err := h.categoryUsecase.Create(c, &categoryDomain, file, header.Size); err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to create category", err)
+	if err := h.categoryUsecase.Create(c, &categoryDomain); err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to create category", err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusCreated, "Category created successfully", category)
+	response.Success(c, http.StatusCreated, "Category created successfully", dto.FromCategory(categoryDomain))
 }
 
 func (h *CategoryHandler) Update(c *gin.Context) {
-	var category dto.UpdateCategory
-
-	// read value from queryparam
 	id := c.Param("uuid")
 	if id == "" {
 		response.Error(c, http.StatusBadRequest, "UUID is required", nil)
 		return
 	}
 
-	category.UUID = uuid.Must(uuid.Parse(id))
-
-	category.Name = c.PostForm("name")
-	category.Tagline = c.PostForm("tagline")
-
-	formJsonStr := c.PostForm("form_json")
-	if formJsonStr != "" {
-		category.FormJson = datatypes.JSON([]byte(formJsonStr))
-	}
-
-	// Lakukan validasi nama & tagline (karena c.PostForm tidak otomatis memicu validasi struct default)
-	if category.Name == "" {
-		response.Error(c, http.StatusBadRequest, "Name is required", nil)
+	var req dto.UpdateCategory
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
 
-	file, header, err := c.Request.FormFile("icon")
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid request body", err)
+	if err := h.validator.Validate(req); err != nil {
+		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
 		return
 	}
 
-	user_uuid := c.MustGet("user_uuid").(uuid.UUID).String()
+	userUUID := c.MustGet("user_uuid").(uuid.UUID).String()
 
 	categoryDomain := domain.Category{
-		UUID:      category.UUID,
-		Name:      category.Name,
-		Tagline:   category.Tagline,
-		FormJson:  category.FormJson,
-		UpdatedBy: user_uuid,
+		UUID:      uuid.Must(uuid.Parse(id)),
+		Name:      req.Name,
+		Tagline:   req.Tagline,
+		FormJson:  req.FormJson,
+		Icon:      req.Icon,
+		UpdatedBy: userUUID,
 	}
 
-	if err := h.categoryUsecase.Update(c, &categoryDomain, file, header.Size); err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to update category", err)
+	if err := h.categoryUsecase.Update(c, &categoryDomain); err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to update category", err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusCreated, "Category updated successfully", category)
+	response.Success(c, http.StatusOK, "Category updated successfully", dto.FromCategory(categoryDomain))
 }
 
 func (h *CategoryHandler) Index(c *gin.Context) {

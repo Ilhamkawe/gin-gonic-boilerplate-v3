@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"io"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
@@ -17,16 +17,31 @@ func NewWarehouseUseCase(warehouseRepo domain.WarehouseRepository, storageServic
 	return &warehouseUseCase{warehouseRepo: warehouseRepo, storageService: storageService}
 }
 
-func (u *warehouseUseCase) Create(ctx context.Context, warehouse *domain.Warehouse, file io.Reader, fileSize int64) error {
+func (u *warehouseUseCase) Create(ctx context.Context, warehouse *domain.Warehouse) error {
 	UUID := uuid.New()
-	fileName := UUID.String() + "/warehouses/" + UUID.String() + ".jpg"
-	imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-	if err != nil {
-		return err
-	}
-
 	warehouse.UUID = UUID
-	warehouse.Photo = imageUrl
+
+	if warehouse.Photo != "" {
+		parts := strings.Split(warehouse.Photo, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
+		}
+
+		if sourcePath != "" {
+			destPath := UUID.String() + "/warehouses/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			warehouse.Photo = strings.Replace(warehouse.Photo, sourcePath, destPath, 1)
+		}
+	}
 
 	return u.warehouseRepo.Create(ctx, warehouse)
 }
@@ -39,15 +54,27 @@ func (u *warehouseUseCase) Fetch(ctx context.Context, limit int, offset int) ([]
 	return u.warehouseRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *warehouseUseCase) Update(ctx context.Context, warehouse *domain.Warehouse, file io.Reader, fileSize int64) error {
-	if file != nil {
-		UUID := uuid.New()
-		fileName := UUID.String() + "/warehouses/" + UUID.String() + ".jpg"
-		imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-		if err != nil {
-			return err
+func (u *warehouseUseCase) Update(ctx context.Context, warehouse *domain.Warehouse) error {
+	if warehouse.Photo != "" && strings.Contains(warehouse.Photo, "/temp/") {
+		parts := strings.Split(warehouse.Photo, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
 		}
-		warehouse.Photo = imageUrl
+
+		if sourcePath != "" {
+			destPath := warehouse.UUID.String() + "/warehouses/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			warehouse.Photo = strings.Replace(warehouse.Photo, sourcePath, destPath, 1)
+		}
 	}
 
 	return u.warehouseRepo.Update(ctx, warehouse)

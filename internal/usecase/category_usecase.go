@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"io"
 	"strings"
 
 	"github.com/google/uuid"
@@ -19,16 +18,31 @@ func NewCategoryUsecase(categoryRepo domain.CategoryRepository, storageService d
 	return &categoryUsecase{categoryRepo: categoryRepo, storageService: storageService}
 }
 
-func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category, file io.Reader, fileSize int64) error {
+func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category) error {
 	UUID := uuid.New()
-	fileName := UUID.String() + ".jpg"
-	imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-	if err != nil {
-		return err
-	}
-
 	category.UUID = UUID
-	category.Icon = imageUrl
+
+	if category.Icon != "" {
+		parts := strings.Split(category.Icon, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
+		}
+
+		if sourcePath != "" {
+			destPath := "categories/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			category.Icon = strings.Replace(category.Icon, sourcePath, destPath, 1)
+		}
+	}
 
 	return u.categoryRepo.Create(ctx, category)
 }
@@ -41,15 +55,27 @@ func (u *categoryUsecase) Fetch(ctx context.Context, limit int, offset int) ([]d
 	return u.categoryRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category, file io.Reader, fileSize int64) error {
-	if file != nil {
-		UUID := uuid.New()
-		fileName := UUID.String() + ".jpg"
-		imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-		if err != nil {
-			return err
+func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category) error {
+	if category.Icon != "" && strings.Contains(category.Icon, "/temp/") {
+		parts := strings.Split(category.Icon, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
 		}
-		category.Icon = imageUrl
+
+		if sourcePath != "" {
+			destPath := "categories/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			category.Icon = strings.Replace(category.Icon, sourcePath, destPath, 1)
+		}
 	}
 
 	return u.categoryRepo.Update(ctx, category)

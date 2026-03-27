@@ -23,19 +23,13 @@ func NewMerchantHandler(merchantUseCase domain.MerchantUseCase, validator *valid
 
 func (h *MerchantHandler) Create(c *gin.Context) {
 	var req dto.CreateMerchantDTO
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
 
 	if err := h.validator.Validate(req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
-		return
-	}
-
-	file, header, err := c.Request.FormFile("photo")
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Photo is required", err.Error())
 		return
 	}
 
@@ -47,6 +41,7 @@ func (h *MerchantHandler) Create(c *gin.Context) {
 		Address:      req.Address,
 		Phone:        req.Phone,
 		Email:        req.Email,
+		Photo:        req.Photo,
 		KeeperId:     req.KeeperId,
 		HasWarehouse: req.HasWarehouse,
 		WarehouseId:  req.WarehouseId,
@@ -54,7 +49,7 @@ func (h *MerchantHandler) Create(c *gin.Context) {
 		CreatedBy:    userUUID,
 	}
 
-	if err := h.merchantUseCase.Create(c, &merchantDomain, file, header.Size); err != nil {
+	if err := h.merchantUseCase.Create(c, &merchantDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create merchant", err.Error())
 		return
 	}
@@ -109,7 +104,7 @@ func (h *MerchantHandler) Update(c *gin.Context) {
 	}
 
 	var req dto.UpdateMerchantDTO
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
@@ -117,12 +112,6 @@ func (h *MerchantHandler) Update(c *gin.Context) {
 	if err := h.validator.Validate(req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
 		return
-	}
-
-	file, header, _ := c.Request.FormFile("photo")
-	var fileSize int64
-	if header != nil {
-		fileSize = header.Size
 	}
 
 	userUUID := c.MustGet("user_uuid").(uuid.UUID).String()
@@ -134,6 +123,7 @@ func (h *MerchantHandler) Update(c *gin.Context) {
 		Address:      req.Address,
 		Phone:        req.Phone,
 		Email:        req.Email,
+		Photo:        req.Photo,
 		KeeperId:     req.KeeperId,
 		HasWarehouse: req.HasWarehouse,
 		WarehouseId:  req.WarehouseId,
@@ -141,7 +131,7 @@ func (h *MerchantHandler) Update(c *gin.Context) {
 		UpdatedBy:    userUUID,
 	}
 
-	if err := h.merchantUseCase.Update(c, &merchantDomain, file, fileSize); err != nil {
+	if err := h.merchantUseCase.Update(c, &merchantDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update merchant", err.Error())
 		return
 	}

@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -51,10 +50,10 @@ type CategoryRepository interface {
 }
 
 type CategoryUseCase interface {
-	Create(ctx context.Context, category *Category, file io.Reader, fileSize int64) error
+	Create(ctx context.Context, category *Category) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Category, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Category, int64, error)
-	Update(ctx context.Context, category *Category, file io.Reader, fileSize int64) error
+	Update(ctx context.Context, category *Category) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetInsight(ctx context.Context) (*InsightCategory, error)
 	IsAvailable(ctx context.Context, uuid uuid.UUID) (bool, error)

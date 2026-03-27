@@ -24,7 +24,7 @@ func NewTenantHandler(tenantUseCase domain.TenantUseCase, validator *validator.C
 
 func (t *TenantHandler) Create(c *gin.Context) {
 	var tenant dto.CreateTenantDTO
-	if err := c.ShouldBind(&tenant); err != nil {
+	if err := c.ShouldBindJSON(&tenant); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
@@ -42,12 +42,6 @@ func (t *TenantHandler) Create(c *gin.Context) {
 		return
 	}
 
-	file, header, err := c.Request.FormFile("photo")
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid request body", err)
-		return
-	}
-
 	tenantDomain := domain.Tenant{
 		Name:      tenant.Name,
 		Address:   tenant.Address,
@@ -59,7 +53,7 @@ func (t *TenantHandler) Create(c *gin.Context) {
 		CreatedBy: user.UUID.String(),
 	}
 
-	if err := t.tenantUseCase.Create(c, &tenantDomain, file, header.Size); err != nil {
+	if err := t.tenantUseCase.Create(c, &tenantDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Internal Server Error", err)
 		return
 	}
@@ -119,7 +113,7 @@ func (t *TenantHandler) Update(c *gin.Context) {
 	}
 
 	var req dto.UpdateTenantDTO
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
@@ -131,23 +125,18 @@ func (t *TenantHandler) Update(c *gin.Context) {
 
 	user := c.MustGet("user").(dto.UserProfileResponse)
 
-	file, header, _ := c.Request.FormFile("photo")
-	var fileSize int64
-	if header != nil {
-		fileSize = header.Size
-	}
-
 	tenantDomain := domain.Tenant{
 		UUID:      uuid.Must(uuid.Parse(id)),
 		Name:      req.Name,
 		Address:   req.Address,
 		Phone:     req.Phone,
 		Email:     strings.ToLower(req.Email),
+		Photo:     req.Photo,
 		Subdomain: strings.ToLower(req.Subdomain),
 		UpdatedBy: user.UUID.String(),
 	}
 
-	if err := t.tenantUseCase.Update(c, &tenantDomain, file, fileSize); err != nil {
+	if err := t.tenantUseCase.Update(c, &tenantDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update tenant", err.Error())
 		return
 	}

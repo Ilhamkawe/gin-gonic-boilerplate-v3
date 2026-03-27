@@ -20,18 +20,20 @@ type WarehouseResponse struct {
 }
 
 type CreateWarehouseDTO struct {
-	Name    string `json:"name" form:"name" validate:"required"`
-	Address string `json:"address" form:"address" validate:"required"`
-	Phone   string `json:"phone" form:"phone" validate:"required"`
-	Email   string `json:"email" form:"email" validate:"required,email"`
+	Name    string `json:"name" validate:"required"`
+	Address string `json:"address" validate:"required"`
+	Phone   string `json:"phone" validate:"required"`
+	Email   string `json:"email" validate:"required,email"`
+	Photo   string `json:"photo"`
 }
 
 type UpdateWarehouseDTO struct {
-	UUID    uuid.UUID `json:"uuid" form:"uuid"`
-	Name    string    `json:"name" form:"name" validate:"required"`
-	Address string    `json:"address" form:"address" validate:"required"`
-	Phone   string    `json:"phone" form:"phone" validate:"required"`
-	Email   string    `json:"email" form:"email" validate:"required,email"`
+	UUID    uuid.UUID `json:"uuid"`
+	Name    string    `json:"name" validate:"required"`
+	Address string    `json:"address" validate:"required"`
+	Phone   string    `json:"phone" validate:"required"`
+	Email   string    `json:"email" validate:"required,email"`
+	Photo   string    `json:"photo"`
 }
 
 func FromWarehouse(warehouse domain.Warehouse) WarehouseResponse {

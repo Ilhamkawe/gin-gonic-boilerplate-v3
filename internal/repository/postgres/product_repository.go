@@ -22,7 +22,7 @@ func (r *productRepository) Create(ctx context.Context, product *domain.Product)
 
 func (r *productRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Product, error) {
 	var product domain.Product
-	err := r.db.Where("uuid = ? AND tenant_id = ?", id, ctx.Value("tenant_id").(int)).First(&product).Error
+	err := r.db.Preload("Variants").Where("uuid = ? AND tenant_id = ?", id, ctx.Value("tenant_id").(int)).First(&product).Error
 	return &product, err
 }
 

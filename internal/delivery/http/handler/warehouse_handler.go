@@ -23,19 +23,13 @@ func NewWarehouseHandler(warehouseUseCase domain.WarehouseUseCase, validator *va
 
 func (h *WarehouseHandler) Create(c *gin.Context) {
 	var req dto.CreateWarehouseDTO
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
 
 	if err := h.validator.Validate(req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
-		return
-	}
-
-	file, header, err := c.Request.FormFile("photo")
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Photo is required", err.Error())
 		return
 	}
 
@@ -47,11 +41,12 @@ func (h *WarehouseHandler) Create(c *gin.Context) {
 		Address:   req.Address,
 		Phone:     req.Phone,
 		Email:     req.Email,
+		Photo:     req.Photo,
 		TenantID:  tenantID,
 		CreatedBy: userUUID,
 	}
 
-	if err := h.warehouseUseCase.Create(c, &warehouseDomain, file, header.Size); err != nil {
+	if err := h.warehouseUseCase.Create(c, &warehouseDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create warehouse", err.Error())
 		return
 	}
@@ -106,7 +101,7 @@ func (h *WarehouseHandler) Update(c *gin.Context) {
 	}
 
 	var req dto.UpdateWarehouseDTO
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid request payload", err.Error())
 		return
 	}
@@ -114,12 +109,6 @@ func (h *WarehouseHandler) Update(c *gin.Context) {
 	if err := h.validator.Validate(req); err != nil {
 		response.Error(c, http.StatusBadRequest, "Validation error", err.Error())
 		return
-	}
-
-	file, header, _ := c.Request.FormFile("photo")
-	var fileSize int64
-	if header != nil {
-		fileSize = header.Size
 	}
 
 	userUUID := c.MustGet("user_uuid").(uuid.UUID).String()
@@ -131,11 +120,12 @@ func (h *WarehouseHandler) Update(c *gin.Context) {
 		Address:   req.Address,
 		Phone:     req.Phone,
 		Email:     req.Email,
+		Photo:     req.Photo,
 		TenantID:  tenantID,
 		UpdatedBy: userUUID,
 	}
 
-	if err := h.warehouseUseCase.Update(c, &warehouseDomain, file, fileSize); err != nil {
+	if err := h.warehouseUseCase.Update(c, &warehouseDomain); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update warehouse", err.Error())
 		return
 	}

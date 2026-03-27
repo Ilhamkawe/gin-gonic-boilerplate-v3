@@ -27,6 +27,8 @@ func NewRouter(userHandler *handler.UserHandler,
 	rolePermissionHandler *handler.RolePermissionHandler,
 	userAccessHandler *handler.UserAccessHandler,
 	userTenantHandler *handler.UserTenantHandler,
+	variantHandler *handler.ProductVariantHandler,
+	mediaHandler *handler.MediaHandler,
 ) *gin.Engine {
 	router := gin.New()
 
@@ -41,6 +43,7 @@ func NewRouter(userHandler *handler.UserHandler,
 	api := router.Group("/api")
 	v1 := api.Group("/v1")
 	{
+		v1.POST("/uploads/photo", mediaHandler.UploadPhoto)
 
 		auth := v1.Group("/auth")
 		auth.Use(middleware.AutoMutationAudit(auditLogUsecase))
@@ -145,6 +148,19 @@ func NewRouter(userHandler *handler.UserHandler,
 			products.GET("/:uuid", productHandler.GetByID)
 			products.PUT("/:uuid", productHandler.Update)
 			products.DELETE("/:uuid", productHandler.Delete)
+		}
+
+		variants := v1.Group("/product-variants")
+		variants.Use(
+			middleware.AuthMiddleware(jwtService, userUsecase),
+			middleware.TenantAuthorization(tenantUsecase),
+			middleware.AutoMutationAudit(auditLogUsecase))
+		{
+			variants.POST("", variantHandler.Create)
+			variants.GET("", variantHandler.Index)
+			variants.GET("/:uuid", variantHandler.GetByID)
+			variants.PUT("/:uuid", variantHandler.Update)
+			variants.DELETE("/:uuid", variantHandler.Delete)
 		}
 
 		roles := v1.Group("/roles")

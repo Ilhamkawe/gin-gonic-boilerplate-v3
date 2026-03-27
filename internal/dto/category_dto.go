@@ -27,19 +27,18 @@ type CategoryResponse struct {
 }
 
 type CreateCategory struct {
-	Name     string         `form:"name"`
-	Icon     string         `form:"icon"`
-	Tagline  string         `form:"tagline"`
-	FormJson datatypes.JSON `form:"form_json"`
-	TenantID int            `header:"X-Tenant-ID"`
+	Name     string         `json:"name" validate:"required"`
+	Icon     string         `json:"icon"`
+	Tagline  string         `json:"tagline"`
+	FormJson datatypes.JSON `json:"form_json"`
 }
 
 type UpdateCategory struct {
-	UUID     uuid.UUID      `form:"uuid"`
-	Name     string         `form:"name"`
-	Icon     string         `form:"icon"`
-	Tagline  string         `form:"tagline"`
-	FormJson datatypes.JSON `form:"form_json"`
+	UUID     uuid.UUID      `json:"uuid"`
+	Name     string         `json:"name" validate:"required"`
+	Icon     string         `json:"icon"`
+	Tagline  string         `json:"tagline"`
+	FormJson datatypes.JSON `json:"form_json"`
 }
 
 type InsightCategoryDTO struct {

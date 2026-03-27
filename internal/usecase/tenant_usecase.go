@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"io"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
@@ -19,18 +19,38 @@ func NewTenantUseCase(tenantRepo domain.TenantRepository, userTenantUseCase doma
 	return &tentantUseCase{tenantRepo: tenantRepo, userTenantUseCase: userTenantUseCase, roleUsecase: roleUsecase, storageService: storageService}
 }
 
-func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant, file io.Reader, fileSize int64) error {
+func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant) error {
 	UUID := uuid.New()
-	fileName := UUID.String() + "/" + "tenants/" + UUID.String() + ".jpg"
-	imageUrl, err := t.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-	if err != nil {
-		return err
-	}
-
-	tenant.Photo = imageUrl
 	tenant.UUID = UUID
 
-	err = t.tenantRepo.Create(ctx, tenant)
+	if tenant.Photo != "" {
+		// Example Photo: http://localhost:9000/bucket/temp/abc.jpg
+		// We want to move it to: tenantUUID/photo/abc.jpg
+		
+		// Extract filename from temp path
+		parts := strings.Split(tenant.Photo, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
+		}
+
+		if sourcePath != "" {
+			destPath := UUID.String() + "/photo/" + fileName
+			err := t.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			// Update Photo to new URL (assuming it follows same pattern)
+			tenant.Photo = strings.Replace(tenant.Photo, sourcePath, destPath, 1)
+		}
+	}
+
+	err := t.tenantRepo.Create(ctx, tenant)
 	if err != nil {
 		return err
 	}
@@ -85,15 +105,27 @@ func (t *tentantUseCase) Fetch(ctx context.Context, limit int, offset int) ([]do
 	return t.tenantRepo.Fetch(ctx, limit, offset)
 }
 
-func (t *tentantUseCase) Update(ctx context.Context, tenant *domain.Tenant, file io.Reader, fileSize int64) error {
-	if file != nil {
-		UUID := uuid.New()
-		fileName := UUID.String() + "/" + "tenants/" + UUID.String() + ".jpg"
-		imageUrl, err := t.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-		if err != nil {
-			return err
+func (t *tentantUseCase) Update(ctx context.Context, tenant *domain.Tenant) error {
+	if tenant.Photo != "" && strings.Contains(tenant.Photo, "/temp/") {
+		parts := strings.Split(tenant.Photo, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
 		}
-		tenant.Photo = imageUrl
+
+		if sourcePath != "" {
+			destPath := tenant.UUID.String() + "/photo/" + fileName
+			err := t.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			tenant.Photo = strings.Replace(tenant.Photo, sourcePath, destPath, 1)
+		}
 	}
 
 	return t.tenantRepo.Update(ctx, tenant)

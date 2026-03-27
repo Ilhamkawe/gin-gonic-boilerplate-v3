@@ -22,24 +22,26 @@ type MerchantResponse struct {
 }
 
 type CreateMerchantDTO struct {
-	Name         string `json:"name" form:"name" validate:"required"`
-	Address      string `json:"address" form:"address" validate:"required"`
-	Phone        string `json:"phone" form:"phone" validate:"required"`
-	Email        string `json:"email" form:"email" validate:"required,email"`
-	HasWarehouse bool   `json:"has_warehouse" form:"has_warehouse"`
-	WarehouseId  int    `json:"warehouse_id" form:"warehouse_id"`
-	KeeperId     int    `json:"keeper_id" form:"keeper_id"`
+	Name         string `json:"name" validate:"required"`
+	Address      string `json:"address" validate:"required"`
+	Phone        string `json:"phone" validate:"required"`
+	Email        string `json:"email" validate:"required,email"`
+	Photo        string `json:"photo"`
+	HasWarehouse bool   `json:"has_warehouse"`
+	WarehouseId  int    `json:"warehouse_id"`
+	KeeperId     int    `json:"keeper_id"`
 }
 
 type UpdateMerchantDTO struct {
-	UUID         uuid.UUID `json:"uuid" form:"uuid"`
-	Name         string    `json:"name" form:"name" validate:"required"`
-	Address      string    `json:"address" form:"address" validate:"required"`
-	Phone        string    `json:"phone" form:"phone" validate:"required"`
-	Email        string    `json:"email" form:"email" validate:"required,email"`
-	HasWarehouse bool      `json:"has_warehouse" form:"has_warehouse"`
-	WarehouseId  int       `json:"warehouse_id" form:"warehouse_id"`
-	KeeperId     int       `json:"keeper_id" form:"keeper_id"`
+	UUID         uuid.UUID `json:"uuid"`
+	Name         string    `json:"name" validate:"required"`
+	Address      string    `json:"address" validate:"required"`
+	Phone        string    `json:"phone" validate:"required"`
+	Email        string    `json:"email" validate:"required,email"`
+	Photo        string    `json:"photo"`
+	HasWarehouse bool      `json:"has_warehouse"`
+	WarehouseId  int       `json:"warehouse_id"`
+	KeeperId     int       `json:"keeper_id"`
 }
 
 func FromMerchant(merchant domain.Merchant) MerchantResponse {

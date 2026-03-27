@@ -45,22 +45,23 @@ type TenantPassDTO struct {
 }
 
 type CreateTenantDTO struct {
-	Name      string `json:"name" form:"name" validate:"required"`
-	Address   string `json:"address" form:"address" validate:"required"`
-	Phone     string `json:"phone" form:"phone" validate:"required"`
-	Email     string `json:"email" form:"email" validate:"required,email"`
+	Name      string `json:"name" validate:"required"`
+	Address   string `json:"address" validate:"required"`
+	Phone     string `json:"phone" validate:"required"`
+	Email     string `json:"email" validate:"required,email"`
 	Photo     string `json:"photo"`
-	Subdomain string `json:"subdomain" form:"subdomain" validate:"required"`
+	Subdomain string `json:"subdomain" validate:"required"`
 }
 
 type UpdateTenantDTO struct {
-	ID        int       `json:"id" form:"id"`
-	UUID      uuid.UUID `json:"uuid" form:"uuid"`
-	Name      string    `json:"name" form:"name" validate:"required"`
-	Address   string    `json:"address" form:"address" validate:"required"`
-	Phone     string    `json:"phone" form:"phone" validate:"required"`
-	Email     string    `json:"email" form:"email" validate:"required,email"`
-	Subdomain string    `json:"subdomain" form:"subdomain" validate:"required"`
+	ID        int       `json:"id"`
+	UUID      uuid.UUID `json:"uuid"`
+	Name      string    `json:"name" validate:"required"`
+	Address   string    `json:"address" validate:"required"`
+	Phone     string    `json:"phone" validate:"required"`
+	Email     string    `json:"email" validate:"required,email"`
+	Photo     string    `json:"photo"`
+	Subdomain string    `json:"subdomain" validate:"required"`
 }
 
 func FromTenant(tenant domain.Tenant) TenantResponseDTO {

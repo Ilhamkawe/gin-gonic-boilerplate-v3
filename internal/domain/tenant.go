@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,10 +42,10 @@ type TenantRepository interface {
 }
 
 type TenantUseCase interface {
-	Create(ctx context.Context, tenant *Tenant, file io.Reader, fileSize int64) error
+	Create(ctx context.Context, tenant *Tenant) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Tenant, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Tenant, int64, error)
-	Update(ctx context.Context, tenant *Tenant, file io.Reader, fileSize int64) error
+	Update(ctx context.Context, tenant *Tenant) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error)
 	GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (Tenant, error)

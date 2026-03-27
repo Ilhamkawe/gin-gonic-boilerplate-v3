@@ -52,3 +52,21 @@ func (m *minioService) DeleteFile(ctx context.Context, objectName string) error 
 	}
 	return nil
 }
+
+func (m *minioService) MoveFile(ctx context.Context, sourceObjectName, destinationObjectName string) error {
+	src := minio.CopySrcOptions{
+		Bucket: m.bucketName,
+		Object: sourceObjectName,
+	}
+	dst := minio.CopyDestOptions{
+		Bucket: m.bucketName,
+		Object: destinationObjectName,
+	}
+
+	_, err := m.client.CopyObject(ctx, dst, src)
+	if err != nil {
+		return err
+	}
+
+	return m.DeleteFile(ctx, sourceObjectName)
+}

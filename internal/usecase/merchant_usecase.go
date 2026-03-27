@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"io"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/kawe/warehouse_backend/internal/domain"
@@ -17,16 +17,31 @@ func NewMerchantUseCase(merchantRepo domain.MerchantRepository, storageService d
 	return &merchantUseCase{merchantRepo: merchantRepo, storageService: storageService}
 }
 
-func (u *merchantUseCase) Create(ctx context.Context, merchant *domain.Merchant, file io.Reader, fileSize int64) error {
+func (u *merchantUseCase) Create(ctx context.Context, merchant *domain.Merchant) error {
 	UUID := uuid.New()
-	fileName := UUID.String() + "/merchants/" + UUID.String() + ".jpg"
-	imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-	if err != nil {
-		return err
-	}
-
 	merchant.UUID = UUID
-	merchant.Photo = imageUrl
+
+	if merchant.Photo != "" {
+		parts := strings.Split(merchant.Photo, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
+		}
+
+		if sourcePath != "" {
+			destPath := UUID.String() + "/merchants/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			merchant.Photo = strings.Replace(merchant.Photo, sourcePath, destPath, 1)
+		}
+	}
 
 	return u.merchantRepo.Create(ctx, merchant)
 }
@@ -39,15 +54,27 @@ func (u *merchantUseCase) Fetch(ctx context.Context, limit int, offset int) ([]d
 	return u.merchantRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *merchantUseCase) Update(ctx context.Context, merchant *domain.Merchant, file io.Reader, fileSize int64) error {
-	if file != nil {
-		UUID := uuid.New()
-		fileName := UUID.String() + "/merchants/" + UUID.String() + ".jpg"
-		imageUrl, err := u.storageService.UploadFile(ctx, fileName, file, fileSize, "image/jpeg")
-		if err != nil {
-			return err
+func (u *merchantUseCase) Update(ctx context.Context, merchant *domain.Merchant) error {
+	if merchant.Photo != "" && strings.Contains(merchant.Photo, "/temp/") {
+		parts := strings.Split(merchant.Photo, "/")
+		fileName := parts[len(parts)-1]
+		
+		sourcePath := ""
+		for i, part := range parts {
+			if part == "temp" {
+				sourcePath = strings.Join(parts[i:], "/")
+				break
+			}
 		}
-		merchant.Photo = imageUrl
+
+		if sourcePath != "" {
+			destPath := merchant.UUID.String() + "/merchants/" + fileName
+			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
+			if err != nil {
+				return err
+			}
+			merchant.Photo = strings.Replace(merchant.Photo, sourcePath, destPath, 1)
+		}
 	}
 
 	return u.merchantRepo.Update(ctx, merchant)

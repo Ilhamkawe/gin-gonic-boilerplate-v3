@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"io"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,9 +36,9 @@ type WarehouseRepository interface {
 }
 
 type WarehouseUseCase interface {
-	Create(ctx context.Context, warehouse *Warehouse, file io.Reader, fileSize int64) error
+	Create(ctx context.Context, warehouse *Warehouse) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Warehouse, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Warehouse, int64, error)
-	Update(ctx context.Context, warehouse *Warehouse, file io.Reader, fileSize int64) error
+	Update(ctx context.Context, warehouse *Warehouse) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }

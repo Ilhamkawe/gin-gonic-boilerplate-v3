@@ -134,11 +134,20 @@ func main() {
 	productUsecase := usecase.NewProductUseCase(productRepo, storageService)
 	productHandler := handler.NewProductHandler(productUsecase, v)
 
+	// Product Variant module
+	variantRepo := postgres.NewProductVariantRepository(db)
+	variantUsecase := usecase.NewProductVariantUseCase(variantRepo)
+	variantHandler := handler.NewProductVariantHandler(variantUsecase, v)
+	
+	// Media module
+	mediaUsecase := usecase.NewMediaUseCase(storageService)
+	mediaHandler := handler.NewMediaHandler(mediaUsecase)
+
 	// Authorization handler
 	authorizationHandler := handler.NewAuthorizationHandler(jwtService, userUsecase, v)
 
 	// Router
-	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantUsecase, tenantHandler, auditLogUsecase, authorizationHandler, warehouseHandler, merchantHandler, productHandler, roleHandler, permissionHandler, rpHandler, uaHandler, userTenantHandler)
+	r := api.NewRouter(userHandler, categoryHandler, jwtService, userUsecase, tenantUsecase, tenantHandler, auditLogUsecase, authorizationHandler, warehouseHandler, merchantHandler, productHandler, roleHandler, permissionHandler, rpHandler, uaHandler, userTenantHandler, variantHandler, mediaHandler)
 
 	// Server
 	if cfg.AppPort == "" {

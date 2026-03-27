@@ -18,41 +18,44 @@ type ProductResponse struct {
 	IsPopular     bool       `json:"is_popular"`
 	AttributeJson string     `json:"attribute_json"`
 	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     *time.Time `json:"updated_at"`
+	UpdatedAt     *time.Time               `json:"updated_at"`
+	Variants      []ProductVariantResponse `json:"variants,omitempty"`
 }
 
 type CreateProductDTO struct {
-	Name          string `json:"name" form:"name" validate:"required"`
-	Description   string `json:"description" form:"description" validate:"required"`
-	Price         int    `json:"price" form:"price" validate:"required"`
-	CategoryID    int    `json:"category_id" form:"category_id" validate:"required"`
-	IsPopular     bool   `json:"is_popular" form:"is_popular"`
-	AttributeJson string `json:"attribute_json" form:"attribute_json"`
+	Name          string                    `json:"name" validate:"required"`
+	Description   string                    `json:"description" validate:"required"`
+	Price         int                       `json:"price" validate:"required"`
+	CategoryID    int                       `json:"category_id" validate:"required"`
+	IsPopular     bool                      `json:"is_popular"`
+	Thumbnail     string                    `json:"thumbnail"`
+	AttributeJson string                    `json:"attribute_json"`
+	Variants      []CreateProductVariantDTO `json:"variants"`
 }
 
 type UpdateProductDTO struct {
-	UUID          uuid.UUID `json:"uuid" form:"uuid"`
-	Name          string    `json:"name" form:"name" validate:"required"`
-	Description   string    `json:"description" form:"description" validate:"required"`
-	Price         int       `json:"price" form:"price" validate:"required"`
-	CategoryID    int       `json:"category_id" form:"category_id" validate:"required"`
-	IsPopular     bool      `json:"is_popular" form:"is_popular"`
-	AttributeJson string    `json:"attribute_json" form:"attribute_json"`
+	UUID          uuid.UUID `json:"uuid"`
+	Name          string    `json:"name" validate:"required"`
+	Description   string    `json:"description" validate:"required"`
+	Price         int       `json:"price" validate:"required"`
+	CategoryID    int       `json:"category_id" validate:"required"`
+	IsPopular     bool      `json:"is_popular"`
+	Thumbnail     string    `json:"thumbnail"`
+	AttributeJson string    `json:"attribute_json"`
 }
 
 func FromProduct(product domain.Product) ProductResponse {
 	return ProductResponse{
-		ID:            product.ID,
-		UUID:          product.UUID,
-		Name:          product.Name,
-		Thumbnail:     product.Thumbnail,
-		Description:   product.Description,
-		Price:         product.Price,
-		CategoryID:    product.CategoryID,
-		IsPopular:     product.IsPopular,
-		AttributeJson: product.AttributeJson,
-		CreatedAt:     product.CreatedAt,
-		UpdatedAt:     product.UpdatedAt,
+		ID:          product.ID,
+		UUID:        product.UUID,
+		Name:        product.Name,
+		Thumbnail:   product.Thumbnail,
+		Description: product.Description,
+		CategoryID:  product.CategoryID,
+		IsPopular:   product.IsPopular,
+		CreatedAt:   product.CreatedAt,
+		UpdatedAt:   product.UpdatedAt,
+		Variants:    FromProductVariants(product.Variants),
 	}
 }
 
