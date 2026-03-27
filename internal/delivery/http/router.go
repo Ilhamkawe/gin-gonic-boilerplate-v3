@@ -43,7 +43,7 @@ func NewRouter(userHandler *handler.UserHandler,
 	api := router.Group("/api")
 	v1 := api.Group("/v1")
 	{
-		v1.POST("/uploads/photo", mediaHandler.UploadPhoto)
+		v1.POST("/uploads/image", mediaHandler.UploadPhoto)
 
 		auth := v1.Group("/auth")
 		auth.Use(middleware.AutoMutationAudit(auditLogUsecase))

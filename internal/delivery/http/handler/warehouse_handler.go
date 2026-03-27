@@ -46,7 +46,9 @@ func (h *WarehouseHandler) Create(c *gin.Context) {
 		CreatedBy: userUUID,
 	}
 
-	if err := h.warehouseUseCase.Create(c, &warehouseDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.warehouseUseCase.Create(c, &warehouseDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create warehouse", err.Error())
 		return
 	}
@@ -125,7 +127,9 @@ func (h *WarehouseHandler) Update(c *gin.Context) {
 		UpdatedBy: userUUID,
 	}
 
-	if err := h.warehouseUseCase.Update(c, &warehouseDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.warehouseUseCase.Update(c, &warehouseDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update warehouse", err.Error())
 		return
 	}

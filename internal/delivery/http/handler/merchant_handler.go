@@ -49,7 +49,9 @@ func (h *MerchantHandler) Create(c *gin.Context) {
 		CreatedBy:    userUUID,
 	}
 
-	if err := h.merchantUseCase.Create(c, &merchantDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.merchantUseCase.Create(c, &merchantDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create merchant", err.Error())
 		return
 	}
@@ -131,7 +133,9 @@ func (h *MerchantHandler) Update(c *gin.Context) {
 		UpdatedBy:    userUUID,
 	}
 
-	if err := h.merchantUseCase.Update(c, &merchantDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.merchantUseCase.Update(c, &merchantDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update merchant", err.Error())
 		return
 	}

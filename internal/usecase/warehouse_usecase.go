@@ -17,7 +17,7 @@ func NewWarehouseUseCase(warehouseRepo domain.WarehouseRepository, storageServic
 	return &warehouseUseCase{warehouseRepo: warehouseRepo, storageService: storageService}
 }
 
-func (u *warehouseUseCase) Create(ctx context.Context, warehouse *domain.Warehouse) error {
+func (u *warehouseUseCase) Create(ctx context.Context, warehouse *domain.Warehouse, tenantUUID string) error {
 	UUID := uuid.New()
 	warehouse.UUID = UUID
 
@@ -34,7 +34,7 @@ func (u *warehouseUseCase) Create(ctx context.Context, warehouse *domain.Warehou
 		}
 
 		if sourcePath != "" {
-			destPath := UUID.String() + "/warehouses/" + fileName
+			destPath := tenantUUID + "/warehouse/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err
@@ -54,7 +54,7 @@ func (u *warehouseUseCase) Fetch(ctx context.Context, limit int, offset int) ([]
 	return u.warehouseRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *warehouseUseCase) Update(ctx context.Context, warehouse *domain.Warehouse) error {
+func (u *warehouseUseCase) Update(ctx context.Context, warehouse *domain.Warehouse, tenantUUID string) error {
 	if warehouse.Photo != "" && strings.Contains(warehouse.Photo, "/temp/") {
 		parts := strings.Split(warehouse.Photo, "/")
 		fileName := parts[len(parts)-1]
@@ -68,7 +68,7 @@ func (u *warehouseUseCase) Update(ctx context.Context, warehouse *domain.Warehou
 		}
 
 		if sourcePath != "" {
-			destPath := warehouse.UUID.String() + "/warehouses/" + fileName
+			destPath := tenantUUID + "/warehouse/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err

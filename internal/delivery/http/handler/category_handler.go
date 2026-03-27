@@ -61,7 +61,9 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 		CreatedBy: userUUID,
 	}
 
-	if err := h.categoryUsecase.Create(c, &categoryDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.categoryUsecase.Create(c, &categoryDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create category", err.Error())
 		return
 	}
@@ -98,7 +100,9 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		UpdatedBy: userUUID,
 	}
 
-	if err := h.categoryUsecase.Update(c, &categoryDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.categoryUsecase.Update(c, &categoryDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update category", err.Error())
 		return
 	}

@@ -33,7 +33,7 @@ func (r *categoryRepository) Fetch(ctx context.Context, limit int, offset int) (
 		return nil, 0, err
 	}
 
-	err := r.db.Where("tenant_id = ?").Limit(limit).Offset(offset).Find(&categories).Error
+	err := r.db.Where("tenant_id = ?", tenantID).Limit(limit).Offset(offset).Find(&categories).Error
 	return categories, total, err
 }
 

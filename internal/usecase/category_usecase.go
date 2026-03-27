@@ -18,14 +18,14 @@ func NewCategoryUsecase(categoryRepo domain.CategoryRepository, storageService d
 	return &categoryUsecase{categoryRepo: categoryRepo, storageService: storageService}
 }
 
-func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category) error {
+func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category, tenantUUID string) error {
 	UUID := uuid.New()
 	category.UUID = UUID
 
 	if category.Icon != "" {
 		parts := strings.Split(category.Icon, "/")
 		fileName := parts[len(parts)-1]
-		
+
 		sourcePath := ""
 		for i, part := range parts {
 			if part == "temp" {
@@ -35,7 +35,7 @@ func (u *categoryUsecase) Create(ctx context.Context, category *domain.Category)
 		}
 
 		if sourcePath != "" {
-			destPath := "categories/" + fileName
+			destPath := tenantUUID + "/categories/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err
@@ -55,11 +55,11 @@ func (u *categoryUsecase) Fetch(ctx context.Context, limit int, offset int) ([]d
 	return u.categoryRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category) error {
+func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category, tenantUUID string) error {
 	if category.Icon != "" && strings.Contains(category.Icon, "/temp/") {
 		parts := strings.Split(category.Icon, "/")
 		fileName := parts[len(parts)-1]
-		
+
 		sourcePath := ""
 		for i, part := range parts {
 			if part == "temp" {
@@ -69,7 +69,7 @@ func (u *categoryUsecase) Update(ctx context.Context, category *domain.Category)
 		}
 
 		if sourcePath != "" {
-			destPath := "categories/" + fileName
+			destPath := tenantUUID + "/categories/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err

@@ -17,7 +17,7 @@ func NewMerchantUseCase(merchantRepo domain.MerchantRepository, storageService d
 	return &merchantUseCase{merchantRepo: merchantRepo, storageService: storageService}
 }
 
-func (u *merchantUseCase) Create(ctx context.Context, merchant *domain.Merchant) error {
+func (u *merchantUseCase) Create(ctx context.Context, merchant *domain.Merchant, tenantUUID string) error {
 	UUID := uuid.New()
 	merchant.UUID = UUID
 
@@ -34,7 +34,7 @@ func (u *merchantUseCase) Create(ctx context.Context, merchant *domain.Merchant)
 		}
 
 		if sourcePath != "" {
-			destPath := UUID.String() + "/merchants/" + fileName
+			destPath := tenantUUID + "/merchant/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err
@@ -54,7 +54,7 @@ func (u *merchantUseCase) Fetch(ctx context.Context, limit int, offset int) ([]d
 	return u.merchantRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *merchantUseCase) Update(ctx context.Context, merchant *domain.Merchant) error {
+func (u *merchantUseCase) Update(ctx context.Context, merchant *domain.Merchant, tenantUUID string) error {
 	if merchant.Photo != "" && strings.Contains(merchant.Photo, "/temp/") {
 		parts := strings.Split(merchant.Photo, "/")
 		fileName := parts[len(parts)-1]
@@ -68,7 +68,7 @@ func (u *merchantUseCase) Update(ctx context.Context, merchant *domain.Merchant)
 		}
 
 		if sourcePath != "" {
-			destPath := merchant.UUID.String() + "/merchants/" + fileName
+			destPath := tenantUUID + "/merchant/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err

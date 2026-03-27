@@ -31,12 +31,12 @@ type Tenant struct {
 type TenantRepository interface {
 	Create(ctx context.Context, tenant *Tenant) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Tenant, error)
-	Fetch(ctx context.Context, limit int, offset int) ([]Tenant, int64, error)
+	Fetch(ctx context.Context, userID int, limit int, offset int) ([]Tenant, int64, error)
 	Update(ctx context.Context, tenant *Tenant) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error)
-	GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (Tenant, error)
-	GetAuthorizedTenants(ctx context.Context, ownerID int) ([]Tenant, error)
+	IsAuthorized(ctx context.Context, id uuid.UUID, userID int) (bool, error)
+	GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, userID int) (Tenant, error)
+	GetAuthorizedTenants(ctx context.Context, userID int) ([]Tenant, error)
 	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
 	GetByUUID(ctx context.Context, uuid uuid.UUID) (*Tenant, error)
 }
@@ -44,12 +44,12 @@ type TenantRepository interface {
 type TenantUseCase interface {
 	Create(ctx context.Context, tenant *Tenant) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Tenant, error)
-	Fetch(ctx context.Context, limit int, offset int) ([]Tenant, int64, error)
+	Fetch(ctx context.Context, userID int, limit int, offset int) ([]Tenant, int64, error)
 	Update(ctx context.Context, tenant *Tenant) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error)
-	GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (Tenant, error)
-	GetAuthorizedTenants(ctx context.Context, ownerID int) ([]Tenant, error)
+	IsAuthorized(ctx context.Context, id uuid.UUID, userID int) (bool, error)
+	GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, userID int) (Tenant, error)
+	GetAuthorizedTenants(ctx context.Context, userID int) ([]Tenant, error)
 	GetBySubdomain(ctx context.Context, subdomain string) (*Tenant, error)
 	IsSubdomainExist(ctx context.Context, subdomain string) (bool, error)
 	GetByUUID(ctx context.Context, uuid uuid.UUID) (*Tenant, error)

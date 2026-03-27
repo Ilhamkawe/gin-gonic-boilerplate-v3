@@ -40,7 +40,7 @@ func (t *tentantUseCase) Create(ctx context.Context, tenant *domain.Tenant) erro
 		}
 
 		if sourcePath != "" {
-			destPath := UUID.String() + "/photo/" + fileName
+			destPath := UUID.String() + "/tenant/" + fileName
 			err := t.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err
@@ -101,8 +101,8 @@ func (t *tentantUseCase) GetByID(ctx context.Context, id uuid.UUID) (*domain.Ten
 	return t.tenantRepo.GetByID(ctx, id)
 }
 
-func (t *tentantUseCase) Fetch(ctx context.Context, limit int, offset int) ([]domain.Tenant, int64, error) {
-	return t.tenantRepo.Fetch(ctx, limit, offset)
+func (t *tentantUseCase) Fetch(ctx context.Context, userID int, limit int, offset int) ([]domain.Tenant, int64, error) {
+	return t.tenantRepo.Fetch(ctx, userID, limit, offset)
 }
 
 func (t *tentantUseCase) Update(ctx context.Context, tenant *domain.Tenant) error {
@@ -119,7 +119,7 @@ func (t *tentantUseCase) Update(ctx context.Context, tenant *domain.Tenant) erro
 		}
 
 		if sourcePath != "" {
-			destPath := tenant.UUID.String() + "/photo/" + fileName
+			destPath := tenant.UUID.String() + "/tenant/" + fileName
 			err := t.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err
@@ -135,16 +135,16 @@ func (t *tentantUseCase) Delete(ctx context.Context, id uuid.UUID) error {
 	return t.tenantRepo.Delete(ctx, id)
 }
 
-func (t *tentantUseCase) IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error) {
-	return t.tenantRepo.IsAuthorized(ctx, id, ownerID)
+func (t *tentantUseCase) IsAuthorized(ctx context.Context, id uuid.UUID, userID int) (bool, error) {
+	return t.tenantRepo.IsAuthorized(ctx, id, userID)
 }
 
-func (t *tentantUseCase) GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (domain.Tenant, error) {
-	return t.tenantRepo.GetAuthorizedTenant(ctx, tenantID, ownerID)
+func (t *tentantUseCase) GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, userID int) (domain.Tenant, error) {
+	return t.tenantRepo.GetAuthorizedTenant(ctx, tenantID, userID)
 }
 
-func (t *tentantUseCase) GetAuthorizedTenants(ctx context.Context, ownerID int) ([]domain.Tenant, error) {
-	return t.tenantRepo.GetAuthorizedTenants(ctx, ownerID)
+func (t *tentantUseCase) GetAuthorizedTenants(ctx context.Context, userID int) ([]domain.Tenant, error) {
+	return t.tenantRepo.GetAuthorizedTenants(ctx, userID)
 }
 
 func (t *tentantUseCase) GetBySubdomain(ctx context.Context, subdomain string) (*domain.Tenant, error) {

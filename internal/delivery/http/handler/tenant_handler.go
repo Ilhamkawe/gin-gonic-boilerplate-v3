@@ -85,7 +85,9 @@ func (t *TenantHandler) Fetch(c *gin.Context) {
 
 	offset := (page - 1) * limit
 
-	tenants, total, err := t.tenantUseCase.Fetch(c, limit, offset)
+	user := c.MustGet("user").(dto.UserProfileResponse)
+
+	tenants, total, err := t.tenantUseCase.Fetch(c, user.ID, limit, offset)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to fetch tenants", err.Error())
 		return

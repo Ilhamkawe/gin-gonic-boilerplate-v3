@@ -39,9 +39,9 @@ type ProductRepository interface {
 }
 
 type ProductUseCase interface {
-	Create(ctx context.Context, product *Product) error
+	Create(ctx context.Context, product *Product, tenantUUID string) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Product, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Product, int64, error)
-	Update(ctx context.Context, product *Product) error
+	Update(ctx context.Context, product *Product, tenantUUID string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }

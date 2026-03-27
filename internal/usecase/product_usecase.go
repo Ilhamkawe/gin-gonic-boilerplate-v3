@@ -17,7 +17,7 @@ func NewProductUseCase(productRepo domain.ProductRepository, storageService doma
 	return &productUseCase{productRepo: productRepo, storageService: storageService}
 }
 
-func (u *productUseCase) Create(ctx context.Context, product *domain.Product) error {
+func (u *productUseCase) Create(ctx context.Context, product *domain.Product, tenantUUID string) error {
 	UUID := uuid.New()
 	product.UUID = UUID
 
@@ -34,7 +34,7 @@ func (u *productUseCase) Create(ctx context.Context, product *domain.Product) er
 		}
 
 		if sourcePath != "" {
-			destPath := UUID.String() + "/products/" + fileName
+			destPath := tenantUUID + "/product/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err
@@ -54,7 +54,7 @@ func (u *productUseCase) Fetch(ctx context.Context, limit int, offset int) ([]do
 	return u.productRepo.Fetch(ctx, limit, offset)
 }
 
-func (u *productUseCase) Update(ctx context.Context, product *domain.Product) error {
+func (u *productUseCase) Update(ctx context.Context, product *domain.Product, tenantUUID string) error {
 	if product.Thumbnail != "" && strings.Contains(product.Thumbnail, "/temp/") {
 		parts := strings.Split(product.Thumbnail, "/")
 		fileName := parts[len(parts)-1]
@@ -68,7 +68,7 @@ func (u *productUseCase) Update(ctx context.Context, product *domain.Product) er
 		}
 
 		if sourcePath != "" {
-			destPath := product.UUID.String() + "/products/" + fileName
+			destPath := tenantUUID + "/product/" + fileName
 			err := u.storageService.MoveFile(ctx, sourcePath, destPath)
 			if err != nil {
 				return err

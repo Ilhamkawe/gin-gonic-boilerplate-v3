@@ -61,7 +61,9 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		productDomain.Variants = variants
 	}
 
-	if err := h.productUseCase.Create(c, &productDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.productUseCase.Create(c, &productDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to create product", err.Error())
 		return
 	}
@@ -135,7 +137,9 @@ func (h *ProductHandler) Update(c *gin.Context) {
 		UpdatedBy:   userUUID,
 	}
 
-	if err := h.productUseCase.Update(c, &productDomain); err != nil {
+	tenantUUID := c.MustGet("tenant_uuid").(uuid.UUID).String()
+
+	if err := h.productUseCase.Update(c, &productDomain, tenantUUID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update product", err.Error())
 		return
 	}

@@ -28,15 +28,22 @@ func (t *tenantRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.T
 	return &tenant, nil
 }
 
-func (t *tenantRepository) Fetch(ctx context.Context, limit int, offset int) ([]domain.Tenant, int64, error) {
+func (t *tenantRepository) Fetch(ctx context.Context, userID int, limit int, offset int) ([]domain.Tenant, int64, error) {
 	var tenants []domain.Tenant
 	var count int64
-	if err := t.db.Model(&domain.Tenant{}).Count(&count).Error; err != nil {
+
+	query := t.db.Model(&domain.Tenant{}).
+		Joins("JOIN user_tenants ON tenants.id = user_tenants.tenant_id").
+		Where("user_tenants.user_id = ? AND user_tenants.deleted_at IS NULL", userID)
+
+	if err := query.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
-	if err := t.db.Limit(limit).Offset(offset).Find(&tenants).Error; err != nil {
+
+	if err := query.Limit(limit).Offset(offset).Find(&tenants).Error; err != nil {
 		return nil, 0, err
 	}
+
 	return tenants, count, nil
 }
 
@@ -48,25 +55,32 @@ func (t *tenantRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return t.db.Delete(&domain.Tenant{}, "uuid = ?", id).Error
 }
 
-func (t *tenantRepository) IsAuthorized(ctx context.Context, id uuid.UUID, ownerID int) (bool, error) {
-	var tenant domain.Tenant
-	if err := t.db.Where("uuid = ? AND owner_id = ?", id, ownerID).First(&tenant).Error; err != nil {
+func (t *tenantRepository) IsAuthorized(ctx context.Context, id uuid.UUID, userID int) (bool, error) {
+	var count int64
+	if err := t.db.Model(&domain.Tenant{}).
+		Joins("JOIN user_tenants ON tenants.id = user_tenants.tenant_id").
+		Where("tenants.uuid = ? AND user_tenants.user_id = ? AND user_tenants.deleted_at IS NULL", id, userID).
+		Count(&count).Error; err != nil {
 		return false, err
 	}
-	return true, nil
+	return count > 0, nil
 }
 
-func (t *tenantRepository) GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, ownerID int) (domain.Tenant, error) {
+func (t *tenantRepository) GetAuthorizedTenant(ctx context.Context, tenantID uuid.UUID, userID int) (domain.Tenant, error) {
 	var tenant domain.Tenant
-	if err := t.db.Where("uuid = ? AND owner_id = ?", tenantID, ownerID).First(&tenant).Error; err != nil {
+	if err := t.db.Joins("JOIN user_tenants ON tenants.id = user_tenants.tenant_id").
+		Where("tenants.uuid = ? AND user_tenants.user_id = ? AND user_tenants.deleted_at IS NULL", tenantID, userID).
+		First(&tenant).Error; err != nil {
 		return tenant, err
 	}
 	return tenant, nil
 }
 
-func (t *tenantRepository) GetAuthorizedTenants(ctx context.Context, ownerID int) ([]domain.Tenant, error) {
+func (t *tenantRepository) GetAuthorizedTenants(ctx context.Context, userID int) ([]domain.Tenant, error) {
 	var tenants []domain.Tenant
-	if err := t.db.Where("owner_id = ?", ownerID).Find(&tenants).Error; err != nil {
+	if err := t.db.Joins("JOIN user_tenants ON tenants.id = user_tenants.tenant_id").
+		Where("user_tenants.user_id = ? AND user_tenants.deleted_at IS NULL", userID).
+		Find(&tenants).Error; err != nil {
 		return nil, err
 	}
 	return tenants, nil

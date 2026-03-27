@@ -36,9 +36,9 @@ type WarehouseRepository interface {
 }
 
 type WarehouseUseCase interface {
-	Create(ctx context.Context, warehouse *Warehouse) error
+	Create(ctx context.Context, warehouse *Warehouse, tenantUUID string) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Warehouse, error)
 	Fetch(ctx context.Context, limit int, offset int) ([]Warehouse, int64, error)
-	Update(ctx context.Context, warehouse *Warehouse) error
+	Update(ctx context.Context, warehouse *Warehouse, tenantUUID string) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
